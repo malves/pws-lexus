@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lexus - Journées portes ouvertes</title>
+  <link rel="icon" href="assets/logo.jpg" type="image/jpeg">
+  <meta name="description" content="Découvrez les offres Lexus LBX et NX lors de nos journées portes ouvertes les 13 et 14 juin 2026.">
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+  </script>
+  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-598D767N"></script>
+  <style>
+    :root {
+      --white: #fffaf2;
+      --ink: #10100f;
+      --muted: rgba(255, 250, 242, .78);
+      --gold: #bfa36b;
+      --copper: #b5684d;
+      --line: rgba(255, 255, 255, .18);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: LexusRoman, "Helvetica Neue", Arial, sans-serif;
+      color: var(--white);
+      background: #090909;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .home {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-height: 100dvh;
+      isolation: isolate;
+    }
+
+    .home::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(120% 80% at 50% -10%, rgba(191, 163, 107, .12), transparent 60%),
+        #090909;
+    }
+
+    .home-top {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: clamp(28px, 5vh, 56px) 20px 0;
+      text-align: center;
+    }
+
+    .home-logo {
+      width: 188px;
+      height: 52px;
+      object-fit: cover;
+      object-position: center;
+      mix-blend-mode: screen;
+    }
+
+    .home-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(11px, 1.4vw, 14px);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .home-title {
+      margin: 6px 0 0;
+      font-size: clamp(26px, 4vw, 46px);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: .01em;
+      text-wrap: balance;
+    }
+
+    .home-sub {
+      margin: 10px 0 0;
+      max-width: 540px;
+      color: var(--muted);
+      font-size: clamp(13px, 1.5vw, 16px);
+      line-height: 1.5;
+    }
+
+    .models {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(16px, 2.4vw, 30px);
+      align-content: center;
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: clamp(24px, 4vh, 48px) clamp(18px, 4vw, 48px);
+    }
+
+    .model {
+      position: relative;
+      display: block;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      aspect-ratio: 4 / 5;
+      background: #111;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .4);
+      transition: transform .45s ease, box-shadow .45s ease, border-color .45s ease;
+    }
+
+    .model img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.02);
+      transition: transform .6s ease, filter .6s ease;
+      filter: brightness(.92) contrast(1.02);
+    }
+
+    .model::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, .05) 0%, rgba(0, 0, 0, .12) 38%, rgba(9, 9, 9, .9) 100%);
+      transition: background .45s ease;
+    }
+
+    .model-body {
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: clamp(20px, 3vw, 34px);
+    }
+
+    .model-kicker {
+      color: var(--gold);
+      font-size: clamp(11px, 1.2vw, 13px);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .model-name {
+      margin: 0;
+      font-size: clamp(30px, 4.4vw, 56px);
+      font-weight: 500;
+      line-height: .95;
+    }
+
+    .model-desc {
+      margin: 0;
+      max-width: 320px;
+      color: var(--muted);
+      font-size: clamp(13px, 1.5vw, 15px);
+      line-height: 1.4;
+    }
+
+    .model-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 8px;
+      padding: 11px 20px;
+      border: 1px solid rgba(255, 250, 242, .4);
+      border-radius: 999px;
+      color: var(--white);
+      font-size: clamp(13px, 1.4vw, 15px);
+      font-weight: 500;
+      letter-spacing: .02em;
+      background: rgba(255, 250, 242, .08);
+      backdrop-filter: blur(8px);
+      transition: background .35s ease, border-color .35s ease, gap .35s ease;
+    }
+
+    .model-cta svg {
+      width: 16px;
+      height: 16px;
+      transition: transform .35s ease;
+    }
+
+    .model:hover {
+      transform: translateY(-6px);
+      border-color: rgba(191, 163, 107, .55);
+      box-shadow: 0 32px 90px rgba(0, 0, 0, .55);
+    }
+
+    .model:hover img {
+      transform: scale(1.08);
+      filter: brightness(1) contrast(1.04);
+    }
+
+    .model:hover::after {
+      background: linear-gradient(180deg, rgba(0, 0, 0, .05) 0%, rgba(0, 0, 0, .2) 38%, rgba(9, 9, 9, .94) 100%);
+    }
+
+    .model:hover .model-cta {
+      gap: 14px;
+      border-color: var(--gold);
+      background: rgba(191, 163, 107, .22);
+    }
+
+    .model:hover .model-cta svg {
+      transform: translateX(4px);
+    }
+
+    .model:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 4px;
+    }
+
+    .home-foot {
+      padding: 0 20px clamp(22px, 4vh, 40px);
+      color: rgba(255, 250, 242, .5);
+      font-size: 13px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .home {
+        grid-template-rows: auto auto auto;
+      }
+
+      .models {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 24px 16px 8px;
+      }
+
+      .model {
+        aspect-ratio: 16 / 11;
+      }
+
+      .model-desc { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-598D767N" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+  <main class="home">
+    <header class="home-top">
+      <img class="home-logo" src="assets/logo.jpg" alt="Lexus">
+      <p class="home-note">Journées portes ouvertes - 13 et 14 juin 2026</p>
+      <h1 class="home-title">Découvrez nos modèles hybrides</h1>
+      <p class="home-sub">Choisissez le modèle qui vous intéresse pour découvrir l'offre et réserver votre essai près de chez vous.</p>
+    </header>
+
+    <section class="models" aria-label="Nos modèles">
+      <a class="model" href="/modele-lbx" aria-label="Découvrir le Lexus LBX">
+        <img src="assets/lbx-city.jpg" alt="Lexus LBX">
+        <div class="model-body">
+          <span class="model-kicker">Hybride auto-rechargeable</span>
+          <p class="model-name">Lexus LBX</p>
+          <p class="model-desc">Le SUV urbain compact, dès 269 €/mois en LLD, entretien inclus.</p>
+          <span class="model-cta">
+            Découvrir l'offre
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+      </a>
+
+      <a class="model" href="/modele-nx" aria-label="Découvrir le Lexus NX">
+        <img src="assets/nx-350h.jpg" alt="Lexus NX">
+        <div class="model-body">
+          <span class="model-kicker">Hybride</span>
+          <p class="model-name">Lexus NX</p>
+          <p class="model-desc">Le SUV premium polyvalent, dès 449 €/mois en LLD, entretien inclus.</p>
+          <span class="model-cta">
+            Découvrir l'offre
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+      </a>
+    </section>
+
+    <footer class="home-foot">
+      Consommation et émissions homologuées WLTP. Visuels non contractuels.
+    </footer>
+  </main>
+</body>
+</html>

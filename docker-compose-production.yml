@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  pws-lexus:
+    image: kleekr/jpo-lexus:1.0
+    container_name: pws-lexus
+    restart: unless-stopped
+    env_file:
+      - pws-lexus.env
+    environment:
+      NODE_ENV: production
+      PORT: 8010
+      DB_PATH: /data/leads.db
+    volumes:
+      - pws-lexus-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:8010/', (r) => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - traefik_reverse_proxy
+
+networks:
+  traefik_reverse_proxy:
+    external: true
+
+volumes:
+  pws-lexus-data:

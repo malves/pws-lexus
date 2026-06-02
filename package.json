@@ -1,0 +1,17 @@
+{
+  "name": "pws-lexus",
+  "version": "1.0.0",
+  "description": "Landing pages Lexus JPO (LBX + NX) avec backend de monitoring des leads (SQLite).",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1"
+  }
+}
