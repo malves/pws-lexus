@@ -151,9 +151,9 @@
     .model-sub {
       margin: 8px 0 0;
       color: var(--muted);
-      font-size: clamp(20px, 1.9vw, 28px);
-      line-height: 1.2;
-      font-weight: 400;
+      font-size: clamp(30px, 3vw, 44px);
+      line-height: 1.15;
+      font-weight: 500;
     }
 
     .event-dates {
@@ -202,20 +202,24 @@
     }
 
     .price sup {
-      color: var(--gold);
+      color: white;
       font-size: 24px;
     }
 
-    .offer ul {
+    .offer-title {
+      margin: 0 0 6px;
+      color: var(--white);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .offer-details {
       margin: 0;
-      padding: 0;
-      list-style: none;
       color: rgba(255, 250, 242, .86);
       font-size: 16px;
       line-height: 1.48;
     }
-
-    .offer li + li { margin-top: 3px; }
 
     .facts {
       display: grid;
@@ -369,29 +373,91 @@
 
     .check a { color: #111; }
 
-    .rgpd-more {
+    .form-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 14px;
       margin-top: 8px;
-      color: rgba(17, 17, 17, .55);
-      font-size: 11px;
-      line-height: 1.4;
     }
 
-    .rgpd-more summary {
+    .form-link {
       cursor: pointer;
       color: #111;
       font-size: 11px;
+      line-height: 1.4;
       text-decoration: underline;
-      list-style: none;
-      width: max-content;
+      border: 0;
+      background: none;
+      padding: 0;
+      font-family: inherit;
     }
 
-    .rgpd-more summary::-webkit-details-marker { display: none; }
-
-    .rgpd-more p {
-      margin: 8px 0 0;
+    .legal-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
-    .rgpd-more a { color: #111; }
+    .legal-modal[hidden] {
+      display: none;
+    }
+
+    .legal-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+    }
+
+    .legal-modal-dialog {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 680px);
+      max-height: min(85vh, 720px);
+      overflow: auto;
+      padding: 24px 28px 20px;
+      border-radius: 6px;
+      background: #fffbf5;
+      color: #111;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
+    }
+
+    .legal-modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      border: 0;
+      background: none;
+      color: #111;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .legal-modal-dialog h2 {
+      margin: 0 0 14px;
+      padding-right: 28px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .legal-modal-content {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .legal-modal-content p {
+      margin: 0;
+    }
+
+    .legal-modal-content a {
+      color: #111;
+    }
 
     .cta {
       position: sticky;
@@ -643,8 +709,8 @@
 
       .model-sub {
         margin-top: 6px;
-        font-size: 14px;
-        line-height: 1.25;
+        font-size: clamp(18px, 4.8vw, 26px);
+        line-height: 1.2;
       }
 
       .event-dates {
@@ -669,7 +735,11 @@
       .price small { font-size: 11px; }
       .price sup { font-size: 14px; }
 
-      .offer ul {
+      .offer-title {
+        font-size: 14px;
+      }
+
+      .offer-details {
         font-size: 12px;
         line-height: 1.35;
       }
@@ -808,7 +878,7 @@
       }
 
       .model-sub {
-        font-size: clamp(17px, 1.45vw, 22px);
+        font-size: clamp(24px, 2.2vw, 34px);
         margin-top: 6px;
       }
 
@@ -836,7 +906,11 @@
         font-size: 18px;
       }
 
-      .offer ul {
+      .offer-title {
+        font-size: 15px;
+      }
+
+      .offer-details {
         font-size: 13px;
         line-height: 1.34;
       }
@@ -1012,20 +1086,19 @@
       <section class="copy" aria-labelledby="hero-title">
         <h1 id="hero-title">TOYOTA&nbsp;<span class="h1-model">C-HR+</span></h1>
         <p class="model-sub">100 % électrique</p>
-        <p class="event-dates">Journées portes ouvertes : 13 et 14 juin 2026</p>
+        <p class="event-dates">Journées portes ouvertes : 11 au 15 juin 2026</p>
 
         <div class="offer" aria-label="Offre Toyota C-HR+">
           <div class="price">
-            <small>Dès</small>
-            <strong>329</strong>
+            <small>À partir de</small>
+            <strong>319</strong>
             <sup>€</sup>
-            <small>/mois (1)</small>
+            <small>par mois (1)</small>
           </div>
-          <ul>
-            <li>Entretien inclus et sous condition de reprise</li>
-            <li>LLD 37 mois - 30 000 km</li>
-            <li>1er loyer 4 390 €, puis 36 loyers de 329 €</li>
-          </ul>
+          <div class="offer-copy">
+            <p class="offer-title">Nouveau Toyota C-HR+</p>
+            <p class="offer-details">ENTRETIEN INCLUS** LOA* Easy Plus 37 mois, 1er loyer de 4390 €*** suivi de 36 loyers de 319 €. Montant total dû en cas d'acquisition : 37004 €.</p>
+          </div>
         </div>
 
         <div class="facts" aria-label="Atouts Toyota C-HR+">
@@ -1078,10 +1151,10 @@
                 <span>J'accepte que les informations renseignées soient utilisées par Toyota France pour traiter ma demande de rappel.</span>
               </label>
 
-              <details class="rgpd-more">
-                <summary>Voir les mentions d'information (RGPD)</summary>
-                <p>Les informations et données que vous renseignez sur ce formulaire sont nécessaires à la prise en compte de votre demande. Elles font l'objet d'un traitement informatisé mis en œuvre par Toyota France et peuvent être communiquées à tout concessionnaire et/ou réparateur agréé Toyota à même d'en prendre soin. Elles ne sont conservées que pendant la durée nécessaire à la satisfaction de votre demande. Conformément au RGPD et à la loi française Informatique et Libertés, vous bénéficiez d'un droit d'accès, de modification, d'opposition et de retrait des informations vous concernant, que vous pouvez exercer directement auprès de notre Service Relations Client via <a href="https://www.toyota.fr/informations-legales/politique-generale-confidentialite-protection-donnees" target="_blank" rel="noopener">le lien suivant</a>.</p>
-              </details>
+              <div class="form-links">
+                <button type="button" class="form-link" id="rgpdLink">Voir les mentions d'information (RGPD)</button>
+                <button type="button" class="form-link" id="legalLink">Mentions légales</button>
+              </div>
 
               <button class="cta" type="submit">Être rappelé</button>
               <p class="form-status" id="formStatus" role="alert"></p>
@@ -1112,9 +1185,30 @@
         </div>
         <p><strong>Classe CO₂ : A</strong> — C-HR+ : 0 g/km.</p>
       </div>
-      <p><sup>(1)</sup> Offre aux particuliers, non cumulable avec toute offre en cours, valable pour un Toyota C-HR+ neuf commandé avant le 31/07/2026 dans le réseau Toyota participant, en Location Longue Durée, entretien inclus, de 37 mois et 30 000 km, au 1er des 2 termes atteint. 1er loyer majoré de 4 390 €, suivi de 36 loyers de 329 €. Frais de dossier de 150 € inclus dans la première échéance. Sous réserve d'acceptation par Toyota France Financement - RCS 412 653 180 - ORIAS n°D-P3GY-MUFY9-27 consultable sur <a href="https://www.orias.fr" target="_blank" rel="noopener">www.orias.fr</a>. Modèle présenté : Toyota C-HR+ Design Grande Autonomie neuf aux mêmes conditions. Frais inclus. Voir <a href="https://www.toyota.fr" target="_blank" rel="noopener">Toyota.fr</a>. Autonomie et émissions homologuées WLTP ; l'autonomie réelle varie selon usage, équipements, conditions de circulation et style de conduite. Visuel non contractuel.</p>
-      <div class="eco">Pour les trajets courts, privilégiez la marche ou le vélo.<strong>#SeDéplacerMoinsPolluer</strong></div>
+      <p>Offre réservée aux particuliers, non cumulable avec toute autre offre en cours et valable pour tout Nouveau Toyota C-HR+ neuf commandé du 02/06/2026 au 30/06/2026 inclus, dans le réseau Toyota participant, selon le tarif en vigueur au jour de la souscription du contrat. En fin de contrat, restitution du véhicule dans votre concession avec paiement des frais de remise en état standard et des éventuels kilomètres excédentaires. Sous réserve d'acceptation par TOYOTA FRANCE FINANCEMENT, RCS 412 653 180 - intermédiaire d'assurance européen : n° D-P3GY-MUFY9-27 consultable sur <a href="https://www.orias.fr" target="_blank" rel="noopener">www.orias.fr</a>.</p>
     </footer>
+  </div>
+
+  <div class="legal-modal" id="rgpdModal" hidden>
+    <div class="legal-modal-backdrop" data-modal-close></div>
+    <div class="legal-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="rgpdModalTitle">
+      <button type="button" class="legal-modal-close" data-modal-close aria-label="Fermer">×</button>
+      <h2 id="rgpdModalTitle">Mentions d'information (RGPD)</h2>
+      <div class="legal-modal-content">
+        <p>Les informations et données que vous renseignez sur ce formulaire sont nécessaires à la prise en compte de votre demande. Elles font l'objet d'un traitement informatisé mis en œuvre par Toyota France et peuvent être communiquées à tout concessionnaire et/ou réparateur agréé Toyota à même d'en prendre soin. Elles ne sont conservées que pendant la durée nécessaire à la satisfaction de votre demande. Conformément au RGPD et à la loi française Informatique et Libertés, vous bénéficiez d'un droit d'accès, de modification, d'opposition et de retrait des informations vous concernant, que vous pouvez exercer directement auprès de notre Service Relations Client via <a href="https://www.toyota.fr/informations-legales/politique-generale-confidentialite-protection-donnees" target="_blank" rel="noopener">le lien suivant</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="legal-modal" id="legalModal" hidden>
+    <div class="legal-modal-backdrop" data-modal-close></div>
+    <div class="legal-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
+      <button type="button" class="legal-modal-close" data-modal-close aria-label="Fermer">×</button>
+      <h2 id="legalModalTitle">Mentions légales</h2>
+      <div class="legal-modal-content">
+        <p>Un crédit vous engage et doit être remboursé. Vérifiez vos capacités de remboursement avant de vous engager. * LOA : Location avec option d'achat (1) Exemple pour un Nouveau C-HR+ Design Autonomie Confort Orange Sedona neuf au prix exceptionnel de 34600€, remise de 5000€ déduite pour la souscription d'une offre Easy selon référence au tarif conseillé en vigueur. LOA* 37 mois, 1er loyer de 4390€ suivi de 36 loyers de 319€/mois hors assurances facultatives. ***Après déduction de la prime CEE de 380€ TTC &amp; Frais de dossier de 150€ inclus dans la première échéance. Option d'achat : 20750€ dans la limite de 37 mois &amp; 30 000 km. Montant total dû en cas d'acquisition : 37004€. Assurance de personnes facultative à partir de 41,52€/mois en sus de votre loyer, soit 1536,24€ sur la durée totale du prêt. Modèle présenté : Nouveau Toyota C-HR+ Collection Performance AWD avec Pack Confort bi-ton Gris Astral neuf au prix exceptionnel de 47900€, remise de 5000€ déduite pour la souscription d'une offre Easy selon référence au tarif conseillé en vigueur. LOA* 37 mois, 1er loyer de 4390€ suivi de 36 loyers de 514€/mois hors assurances facultatives. ***Après déduction de la prime CEE de 380€ TTC &amp; Frais de dossier de 150€ inclus dans la première échéance. Option d'achat : 27720€ dans la limite de 37 mois &amp; 30 000 km. Montant total dû en cas d'acquisition : 50994€. Assurance de personnes facultative à partir de 57,48€/mois en sus de votre loyer, soit 2126,76€ sur la durée totale du prêt. Assurance de personne facultative Toyota Life Protect N° M.2023 - 0001 souscrit auprès de Aioi Nissay Dowa Life Insurance of Europe AG, Carl - Zeiss - Ring 25, 85737 Ismaning, Allemagne – société anonyme au capital de 5 000 000 EUR - Registre de commerce et des sociétés Munich HRB 188769, Entreprise soumise au contrôle de Bundesanstalt für Finanzdienstleistungsaufsicht(BaFin), Graurheindorfer Str . 108, 53117 Bonn, Allemagne, et agissant en France sous le régime de la libre prestation de services. ** Entretien inclus dans la limite de 37 mois &amp; 30 000 km (au 1er des 2 termes atteint). Offre réservée aux particuliers, non cumulable avec toute autre offre en cours et valable pour tout Nouveau Toyota C-HR+ neuf commandé du 02/06/2026 au 30/06/2026 inclus, dans le réseau Toyota participant, selon le tarif en vigueur au jour de la souscription du contrat. En fin de contrat, restitution du véhicule dans votre concession avec paiement des frais de remise en état standard et des éventuels kilomètres excédentaires. Sous réserve d'acceptation par TOYOTA FRANCE FINANCEMENT, RCS 412 653 180 - intermédiaire d'assurance européen : n° D-P3GY-MUFY9-27 consultable sur <a href="https://www.orias.fr" target="_blank" rel="noopener">www.orias.fr</a>.</p>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1257,6 +1351,38 @@
         setError(field, false);
         clearGlobalError();
       });
+    });
+
+    function setupModal(modal, trigger) {
+      if (!modal || !trigger) return;
+
+      function openModal() {
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal() {
+        modal.hidden = true;
+        if (!document.querySelector(".legal-modal:not([hidden])")) {
+          document.body.style.overflow = "";
+        }
+      }
+
+      trigger.addEventListener("click", openModal);
+      modal.querySelectorAll("[data-modal-close]").forEach((el) => {
+        el.addEventListener("click", closeModal);
+      });
+    }
+
+    setupModal(document.querySelector("#rgpdModal"), document.querySelector("#rgpdLink"));
+    setupModal(document.querySelector("#legalModal"), document.querySelector("#legalLink"));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      document.querySelectorAll(".legal-modal:not([hidden])").forEach((modal) => {
+        modal.hidden = true;
+      });
+      document.body.style.overflow = "";
     });
   </script>
 </body>

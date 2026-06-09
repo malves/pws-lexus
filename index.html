@@ -366,29 +366,91 @@
 
     .check a { color: #111; }
 
-    .rgpd-more {
+    .form-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 14px;
       margin-top: 8px;
-      color: rgba(17, 17, 17, .55);
-      font-size: 11px;
-      line-height: 1.4;
     }
 
-    .rgpd-more summary {
+    .form-link {
       cursor: pointer;
       color: #111;
       font-size: 11px;
+      line-height: 1.4;
       text-decoration: underline;
-      list-style: none;
-      width: max-content;
+      border: 0;
+      background: none;
+      padding: 0;
+      font-family: inherit;
     }
 
-    .rgpd-more summary::-webkit-details-marker { display: none; }
-
-    .rgpd-more p {
-      margin: 8px 0 0;
+    .legal-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
-    .rgpd-more a { color: #111; }
+    .legal-modal[hidden] {
+      display: none;
+    }
+
+    .legal-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+    }
+
+    .legal-modal-dialog {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 680px);
+      max-height: min(85vh, 720px);
+      overflow: auto;
+      padding: 24px 28px 20px;
+      border-radius: 6px;
+      background: #fffbf5;
+      color: #111;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
+    }
+
+    .legal-modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      border: 0;
+      background: none;
+      color: #111;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .legal-modal-dialog h2 {
+      margin: 0 0 14px;
+      padding-right: 28px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .legal-modal-content {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .legal-modal-content p {
+      margin: 0;
+    }
+
+    .legal-modal-content a {
+      color: #111;
+    }
 
     .cta {
       position: sticky;
@@ -1076,10 +1138,9 @@
                 <span>J'accepte que les informations renseignées soient utilisées par Lexus (division de Toyota France) pour traiter ma demande de rappel.</span>
               </label>
 
-              <details class="rgpd-more">
-                <summary>Voir les mentions d'information (RGPD)</summary>
-                <p>Les informations et données que vous renseignez sur ce formulaire sont nécessaires à la prise en compte de votre demande. Elles font l'objet d'un traitement informatisé mis en œuvre par la division Lexus de Toyota France et peuvent être communiquées à tout concessionnaire et/ou réparateur agréé Lexus à même d'en prendre soin. Elles ne sont conservées que pendant la durée nécessaire à la satisfaction de votre demande. Conformément au RGPD et à la loi française Informatique et Libertés, vous bénéficiez d'un droit d'accès, de modification, d'opposition et de retrait des informations vous concernant, que vous pouvez exercer directement auprès de notre Service Relations Client via <a href="https://www.lexus.fr/informations-legales/politique-generale-confidentialite-protection-donnees" target="_blank" rel="noopener">le lien suivant</a>.</p>
-              </details>
+              <div class="form-links">
+                <button type="button" class="form-link" id="rgpdLink">Voir les mentions d'information (RGPD)</button>
+              </div>
 
               <button class="cta" type="submit">Être rappelé</button>
               <p class="form-status" id="formStatus" role="alert"></p>
@@ -1113,6 +1174,17 @@
       <p><sup>(1)</sup> Offre aux particuliers, non cumulable avec toute offre en cours, valable pour un Lexus LBX 2WD neuf commandé avant le 31/07/2026 dans le réseau Lexus participant, en Location Longue Durée, entretien inclus, de 37 mois et 30 000 km, au 1er des 2 termes atteint. 1er loyer majoré de 4 990 €, suivi de 36 loyers de 269 €. Frais de dossier de 150 € inclus dans la première échéance. Sous réserve d'acceptation par Toyota France Financement - RCS 412 653 180 - ORIAS n°D-P3GY-MUFY9-27 consultable sur <a href="https://www.orias.fr" target="_blank" rel="noopener">www.orias.fr</a>. Modèle présenté : Lexus LBX 2WD Cool avec option peinture métallisée neuf à 387 €/mois, 1er loyer majoré 4 990 € aux mêmes conditions. Frais inclus. Voir <a href="https://www.lexus.fr" target="_blank" rel="noopener">Lexus.fr</a>. Consommation et émissions homologuées WLTP ; la consommation réelle varie selon usage, équipements, conditions de circulation et style de conduite. Visuel non contractuel.</p>
       <div class="eco">Pour les trajets courts, privilégiez la marche ou le vélo.<strong>#SeDéplacerMoinsPolluer</strong></div>
     </footer>
+  </div>
+
+  <div class="legal-modal" id="rgpdModal" hidden>
+    <div class="legal-modal-backdrop" data-modal-close></div>
+    <div class="legal-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="rgpdModalTitle">
+      <button type="button" class="legal-modal-close" data-modal-close aria-label="Fermer">×</button>
+      <h2 id="rgpdModalTitle">Mentions d'information (RGPD)</h2>
+      <div class="legal-modal-content">
+        <p>Les informations et données que vous renseignez sur ce formulaire sont nécessaires à la prise en compte de votre demande. Elles font l'objet d'un traitement informatisé mis en œuvre par la division Lexus de Toyota France et peuvent être communiquées à tout concessionnaire et/ou réparateur agréé Lexus à même d'en prendre soin. Elles ne sont conservées que pendant la durée nécessaire à la satisfaction de votre demande. Conformément au RGPD et à la loi française Informatique et Libertés, vous bénéficiez d'un droit d'accès, de modification, d'opposition et de retrait des informations vous concernant, que vous pouvez exercer directement auprès de notre Service Relations Client via <a href="https://www.lexus.fr/informations-legales/politique-generale-confidentialite-protection-donnees" target="_blank" rel="noopener">le lien suivant</a>.</p>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1255,6 +1327,37 @@
         setError(field, false);
         clearGlobalError();
       });
+    });
+
+    function setupModal(modal, trigger) {
+      if (!modal || !trigger) return;
+
+      function openModal() {
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal() {
+        modal.hidden = true;
+        if (!document.querySelector(".legal-modal:not([hidden])")) {
+          document.body.style.overflow = "";
+        }
+      }
+
+      trigger.addEventListener("click", openModal);
+      modal.querySelectorAll("[data-modal-close]").forEach((el) => {
+        el.addEventListener("click", closeModal);
+      });
+    }
+
+    setupModal(document.querySelector("#rgpdModal"), document.querySelector("#rgpdLink"));
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      document.querySelectorAll(".legal-modal:not([hidden])").forEach((modal) => {
+        modal.hidden = true;
+      });
+      document.body.style.overflow = "";
     });
   </script>
 </body>
