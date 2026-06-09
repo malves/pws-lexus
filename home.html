@@ -3,14 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lexus - Journées portes ouvertes</title>
-  <link rel="icon" href="assets/logo.jpg" type="image/jpeg">
-  <meta name="description" content="Découvrez les offres Lexus LBX et NX lors de nos journées portes ouvertes les 13 et 14 juin 2026.">
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
-  </script>
-  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-598D767N"></script>
+  <title>Journées portes ouvertes - Lexus & Toyota</title>
+  <link rel="icon" href="assets/lexus-logo.svg" type="image/svg+xml">
+  <meta name="description" content="Découvrez les offres Lexus LBX, Lexus NX, Toyota C-HR+ et Toyota Yaris Cross lors de nos journées portes ouvertes les 13 et 14 juin 2026.">
   <style>
     :root {
       --white: #fffaf2;
@@ -66,9 +61,8 @@
     .home-logo {
       width: 188px;
       height: 52px;
-      object-fit: cover;
+      object-fit: contain;
       object-position: center;
-      mix-blend-mode: screen;
     }
 
     .home-note {
@@ -101,7 +95,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: clamp(16px, 2.4vw, 30px);
       align-content: center;
-      width: min(1180px, 100%);
+      width: min(980px, 100%);
       margin: 0 auto;
       padding: clamp(24px, 4vh, 48px) clamp(18px, 4vw, 48px);
     }
@@ -231,6 +225,12 @@
       text-align: center;
     }
 
+    @media (max-width: 960px) {
+      .models {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 760px) {
       .home {
         grid-template-rows: auto auto auto;
@@ -251,14 +251,12 @@
   </style>
 </head>
 <body>
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-598D767N" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-
   <main class="home">
     <header class="home-top">
-      <img class="home-logo" src="assets/logo.jpg" alt="Lexus">
-      <p class="home-note">Journées portes ouvertes - 13 et 14 juin 2026</p>
+      <img class="home-logo" src="assets/lexus-logo.svg" alt="Lexus">
+      <p class="home-note">Journées portes ouvertes : 13 et 14 juin 2026</p>
       <h1 class="home-title">Découvrez nos modèles hybrides</h1>
-      <p class="home-sub">Choisissez le modèle qui vous intéresse pour découvrir l'offre et réserver votre essai près de chez vous.</p>
+      <p class="home-sub">Choisissez le modèle Lexus ou Toyota qui vous intéresse pour découvrir l'offre et réserver votre essai près de chez vous.</p>
     </header>
 
     <section class="models" aria-label="Nos modèles">
@@ -278,11 +276,41 @@
       </a>
 
       <a class="model" href="/modele-nx" aria-label="Découvrir le Lexus NX">
-        <img src="assets/nx-350h.jpg" alt="Lexus NX">
+        <img src="assets/lexus-nx.jpg" alt="Lexus NX">
         <div class="model-body">
           <span class="model-kicker">Hybride</span>
           <p class="model-name">Lexus NX</p>
           <p class="model-desc">Le SUV premium polyvalent, dès 449 €/mois en LLD, entretien inclus.</p>
+          <span class="model-cta">
+            Découvrir l'offre
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+      </a>
+
+      <a class="model" href="/modele-chr" aria-label="Découvrir le Toyota C-HR+">
+        <img src="assets/chr-toyota.jpg" alt="Toyota C-HR+">
+        <div class="model-body">
+          <span class="model-kicker">100 % électrique · 0 g CO₂/km</span>
+          <p class="model-name">Toyota C-HR+</p>
+          <p class="model-desc">Le SUV compact 100 % électrique, dès 329 €/mois en LLD, entretien inclus.</p>
+          <span class="model-cta">
+            Découvrir l'offre
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+      </a>
+
+      <a class="model" href="/modele-yaris-cross" aria-label="Découvrir le Toyota Yaris Cross">
+        <img src="assets/yaris-cross.jpg" alt="Toyota Yaris Cross">
+        <div class="model-body">
+          <span class="model-kicker">Hybride · 108 g CO₂/km</span>
+          <p class="model-name">Toyota Yaris Cross</p>
+          <p class="model-desc">Le SUV urbain polyvalent, dès 259 €/mois en LLD, entretien inclus.</p>
           <span class="model-cta">
             Découvrir l'offre
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

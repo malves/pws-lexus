@@ -24,9 +24,9 @@ RUN mkdir -p /data \
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
-COPY server.js db.js seed.js ./
+COPY server.js db.js ./
 COPY admin ./admin
-COPY home.html index.html nx.html ./
+COPY home.html index.html nx.html chr.html yaris-cross.html ./
 COPY assets ./assets
 
 USER node

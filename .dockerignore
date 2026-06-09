@@ -10,5 +10,6 @@ npm-debug.log*
 *.db-shm
 .DS_Store
 README.md
+assets/yaris-cross.png
 Dockerfile
 .dockerignore

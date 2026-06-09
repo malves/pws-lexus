@@ -1,11 +1,22 @@
-// Pages HTML du back-office, rendues cote serveur (style Lexus).
+// Pages HTML du back-office, rendues cote serveur (multi-marques).
 
-const THEME_STORAGE_KEY = "lexus-admin-theme";
+const ADMIN_APP_NAME = "Landings JPO";
+const THEME_STORAGE_KEY = "landing-admin-theme";
+const THEME_STORAGE_KEY_LEGACY = "lexus-admin-theme";
+const ADMIN_FAVICON =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+      '<rect width="32" height="32" rx="6" fill="#1a1814"/>' +
+      '<path fill="#96783d" d="M7 22V10h3.5v12H7zm6.5-9v9H17v-9h-3.5zm6.5 3v6H20v-6h-3.5zm6.5-6v12H27V10h-3.5z"/>' +
+      "</svg>"
+  );
 
 const THEME_INIT_SCRIPT = `
 <script>
 (function(){
   var t = localStorage.getItem("${THEME_STORAGE_KEY}");
+  if (!t) t = localStorage.getItem("${THEME_STORAGE_KEY_LEGACY}");
   if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
 })();
 </script>`;
@@ -120,8 +131,8 @@ function renderLogin() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Lexus · Connexion</title>
-  <link rel="icon" href="/assets/logo.jpg" type="image/jpeg">
+  <title>Admin · Connexion</title>
+  <link rel="icon" href="${ADMIN_FAVICON}" type="image/svg+xml">
   ${THEME_INIT_SCRIPT}
   <style>
     ${BASE_STYLE}
@@ -132,7 +143,7 @@ function renderLogin() {
       backdrop-filter: blur(6px);
     }
     .brand { text-align: center; margin-bottom: 26px; }
-    .brand .name { letter-spacing: .42em; font-size: 18px; text-transform: uppercase; }
+    .brand .name { letter-spacing: .14em; font-size: 17px; text-transform: uppercase; }
     .brand .sub { color: var(--muted); font-size: 12px; letter-spacing: .12em; margin-top: 8px; text-transform: uppercase; }
     .field { margin-bottom: 16px; }
     .field label { display: block; margin-bottom: 6px; }
@@ -147,7 +158,7 @@ function renderLogin() {
   <div class="wrap">
     <form class="card" id="loginForm">
       <div class="brand">
-        <div class="name">Lexus</div>
+        <div class="name">${ADMIN_APP_NAME}</div>
         <div class="sub">Espace administrateur</div>
       </div>
       <div class="field">
@@ -195,8 +206,8 @@ function renderDashboard() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Lexus · Leads</title>
-  <link rel="icon" href="/assets/logo.jpg" type="image/jpeg">
+  <title>Admin · Leads</title>
+  <link rel="icon" href="${ADMIN_FAVICON}" type="image/svg+xml">
   ${THEME_INIT_SCRIPT}
   <style>
     ${BASE_STYLE}
@@ -205,7 +216,7 @@ function renderDashboard() {
       padding: 18px 28px; border-bottom: 1px solid var(--line);
       position: sticky; top: 0; background: var(--topbar-bg); backdrop-filter: blur(8px); z-index: 5;
     }
-    .topbar .name { letter-spacing: .4em; text-transform: uppercase; font-size: 16px; }
+    .topbar .name { letter-spacing: .12em; text-transform: uppercase; font-size: 16px; }
     .topbar .sub { color: var(--muted); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
     .container { padding: 24px 28px 60px; max-width: 1400px; margin: 0 auto; }
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 26px; }
@@ -270,15 +281,33 @@ function renderDashboard() {
       color: var(--muted); white-space: pre-wrap; word-break: break-all;
       max-height: 120px; overflow-y: auto;
     }
+    .debug-preview {
+      margin: 0; padding: 14px 16px; background: var(--panel-2);
+      border: 1px solid var(--line); border-radius: 2px;
+      font-family: ui-monospace, monospace; font-size: 11px;
+      color: var(--text); white-space: pre-wrap; word-break: break-word;
+      max-height: min(60vh, 520px); overflow: auto;
+    }
+    .modal.debug-modal { max-width: 760px; }
+    .dbw-page {
+      padding: 14px; margin-bottom: 14px; background: var(--panel-2);
+      border: 1px solid var(--line); border-radius: 3px;
+    }
+    .dbw-page-title {
+      font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 12px;
+    }
+    .dbw-page-title .muted { letter-spacing: 0; text-transform: none; }
   </style>
 </head>
 <body>
   <div class="topbar">
     <div>
-      <div class="name">Lexus</div>
-      <div class="sub">Monitoring des leads JPO</div>
+      <div class="name">${ADMIN_APP_NAME}</div>
+      <div class="sub">Monitoring des leads</div>
     </div>
     <div class="topbar-actions">
+      <button type="button" class="btn sm" id="dbwOpenBtn">Databowl</button>
       <button type="button" class="btn sm" id="gaOpenBtn">Google Analytics</button>
       <button type="button" class="btn sm" data-theme-toggle aria-label="Passer en mode clair">Mode clair</button>
       <a class="btn sm" href="/admin/logout">Déconnexion</a>
@@ -291,7 +320,7 @@ function renderDashboard() {
     <div class="filters">
       <div class="f">
         <label>Page</label>
-        <select id="fPage"><option value="">Toutes</option><option value="LBX">LBX</option><option value="NX">NX</option></select>
+        <select id="fPage"><option value="">Toutes</option><option value="LBX">LBX</option><option value="NX">NX</option><option value="CHR">C-HR+</option><option value="YARIS">YARIS</option></select>
       </div>
       <div class="f">
         <label>Statut</label>
@@ -333,6 +362,9 @@ function renderDashboard() {
             <th class="sortable" data-sort="rgpd">RGPD<span class="sort-icon"></span></th>
             <th class="sortable" data-sort="ip">IP<span class="sort-icon"></span></th>
             <th class="sortable" data-sort="databowl_status">Databowl<span class="sort-icon"></span></th>
+            <th>Req. DB</th>
+            <th class="sortable" data-sort="powerspace_status">PowerSpace<span class="sort-icon"></span></th>
+            <th>Req. PS</th>
             <th class="sortable" data-sort="error">Détail<span class="sort-icon"></span></th>
             <th>Actions</th>
           </tr>
@@ -363,11 +395,33 @@ function renderDashboard() {
     </div>
   </div>
 
+  <!-- Modal requete Databowl -->
+  <div class="modal-bg" id="dbwReqModalBg">
+    <div class="modal debug-modal">
+      <h3>Requête Databowl <span class="gold" id="dbwReqId"></span></h3>
+      <pre class="debug-preview" id="dbwReqBody"></pre>
+      <div class="modal-foot">
+        <button class="btn" id="dbwReqClose" type="button">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal requete PowerSpace -->
+  <div class="modal-bg" id="psReqModalBg">
+    <div class="modal debug-modal">
+      <h3>Requête PowerSpace <span class="gold" id="psReqId"></span></h3>
+      <pre class="debug-preview" id="psReqBody"></pre>
+      <div class="modal-foot">
+        <button class="btn" id="psReqClose" type="button">Fermer</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Google Analytics -->
   <div class="modal-bg" id="gaModalBg">
     <div class="modal">
       <h3>Google Analytics</h3>
-      <p class="hint">Le tag gtag.js sera injecté automatiquement dans le &lt;head&gt; des pages publiques (accueil, LBX, NX).</p>
+      <p class="hint">Le tag gtag.js sera injecté automatiquement dans le &lt;head&gt; de toutes les pages publiques (accueil et landings modèles).</p>
       <div class="row full">
         <label for="gaId">ID de mesure GA4</label>
         <input id="gaId" type="text" placeholder="G-S9MXH8G7T2" autocomplete="off" spellcheck="false">
@@ -381,6 +435,63 @@ function renderDashboard() {
       <div class="modal-foot">
         <button class="btn" id="gaCancel" type="button">Annuler</button>
         <button class="btn primary" id="gaSave" type="button">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Databowl -->
+  <div class="modal-bg" id="dbwModalBg">
+    <div class="modal">
+      <h3>Databowl</h3>
+      <p class="hint">Code campagne BACS propre à chaque page. Saisir le code de <strong>préproduction</strong> en local et celui de <strong>production</strong> en production. Les leads valides ne sont envoyés que si la page est activée.</p>
+      <div class="dbw-page">
+        <div class="dbw-page-title">Page LBX <span class="muted">· /modele-lbx</span></div>
+        <div class="row full">
+          <label for="dbwLbxCampaign">Code campagne BACS</label>
+          <input id="dbwLbxCampaign" type="text" placeholder="701Aa00001RlRnv" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="toggle">
+          <input id="dbwLbxEnabled" type="checkbox">
+          <label for="dbwLbxEnabled">Activer l'envoi des leads LBX</label>
+        </div>
+      </div>
+      <div class="dbw-page">
+        <div class="dbw-page-title">Page NX <span class="muted">· /modele-nx</span></div>
+        <div class="row full">
+          <label for="dbwNxCampaign">Code campagne BACS</label>
+          <input id="dbwNxCampaign" type="text" placeholder="701Aa00001sbScR" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="toggle">
+          <input id="dbwNxEnabled" type="checkbox">
+          <label for="dbwNxEnabled">Activer l'envoi des leads NX</label>
+        </div>
+      </div>
+      <div class="dbw-page">
+        <div class="dbw-page-title">Page C-HR+ <span class="muted">· /modele-chr</span></div>
+        <div class="row full">
+          <label for="dbwChrCampaign">Code campagne BACS</label>
+          <input id="dbwChrCampaign" type="text" placeholder="701Aa00001xxxx" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="toggle">
+          <input id="dbwChrEnabled" type="checkbox">
+          <label for="dbwChrEnabled">Activer l'envoi des leads C-HR+</label>
+        </div>
+      </div>
+      <div class="dbw-page">
+        <div class="dbw-page-title">Page YARIS <span class="muted">· /modele-yaris-cross</span></div>
+        <div class="row full">
+          <label for="dbwYarisCampaign">Code campagne BACS</label>
+          <input id="dbwYarisCampaign" type="text" placeholder="701Aa00001xxxx" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="toggle">
+          <input id="dbwYarisEnabled" type="checkbox">
+          <label for="dbwYarisEnabled">Activer l'envoi des leads YARIS</label>
+        </div>
+      </div>
+      <p class="settings-msg" id="dbwMsg" role="status"></p>
+      <div class="modal-foot">
+        <button class="btn" id="dbwCancel" type="button">Annuler</button>
+        <button class="btn primary" id="dbwSave" type="button">Enregistrer</button>
       </div>
     </div>
   </div>
@@ -405,8 +516,31 @@ function renderDashboard() {
       gaSave: document.getElementById("gaSave"),
       gaCancel: document.getElementById("gaCancel"),
       gaMsg: document.getElementById("gaMsg"),
-      gaPreview: document.getElementById("gaPreview")
+      gaPreview: document.getElementById("gaPreview"),
+      dbwOpenBtn: document.getElementById("dbwOpenBtn"),
+      dbwModalBg: document.getElementById("dbwModalBg"),
+      dbwLbxCampaign: document.getElementById("dbwLbxCampaign"),
+      dbwLbxEnabled: document.getElementById("dbwLbxEnabled"),
+      dbwNxCampaign: document.getElementById("dbwNxCampaign"),
+      dbwNxEnabled: document.getElementById("dbwNxEnabled"),
+      dbwChrCampaign: document.getElementById("dbwChrCampaign"),
+      dbwChrEnabled: document.getElementById("dbwChrEnabled"),
+      dbwYarisCampaign: document.getElementById("dbwYarisCampaign"),
+      dbwYarisEnabled: document.getElementById("dbwYarisEnabled"),
+      dbwSave: document.getElementById("dbwSave"),
+      dbwCancel: document.getElementById("dbwCancel"),
+      dbwMsg: document.getElementById("dbwMsg"),
+      dbwReqModalBg: document.getElementById("dbwReqModalBg"),
+      dbwReqId: document.getElementById("dbwReqId"),
+      dbwReqBody: document.getElementById("dbwReqBody"),
+      dbwReqClose: document.getElementById("dbwReqClose"),
+      psReqModalBg: document.getElementById("psReqModalBg"),
+      psReqId: document.getElementById("psReqId"),
+      psReqBody: document.getElementById("psReqBody"),
+      psReqClose: document.getElementById("psReqClose")
     };
+
+    let loadedRows = [];
 
     let sortBy = "created_at";
     let sortDir = "desc";
@@ -483,6 +617,12 @@ function renderDashboard() {
         measurement_id: els.gaId.value.trim(),
         enabled: els.gaEnabled.checked
       };
+      if (body.enabled && !body.measurement_id) {
+        els.gaMsg.textContent = "Saisissez un ID de mesure GA4 pour activer le tracking.";
+        els.gaMsg.className = "settings-msg err";
+        els.gaId.focus();
+        return;
+      }
       const res = await fetch("/api/admin/settings/analytics", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -503,6 +643,87 @@ function renderDashboard() {
       }
     });
 
+    function dbwActiveCount(s) {
+      let n = 0;
+      ["LBX", "NX", "CHR", "YARIS"].forEach((p) => {
+        const c = s[p] || {};
+        if (c.enabled && c.campaign) n++;
+      });
+      return n;
+    }
+
+    async function loadDbwSettings() {
+      const s = await (await fetch("/api/admin/settings/databowl")).json();
+      const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, yaris = s.YARIS || {};
+      els.dbwLbxCampaign.value = lbx.campaign || "";
+      els.dbwLbxEnabled.checked = !!lbx.enabled;
+      els.dbwNxCampaign.value = nx.campaign || "";
+      els.dbwNxEnabled.checked = !!nx.enabled;
+      els.dbwChrCampaign.value = chr.campaign || "";
+      els.dbwChrEnabled.checked = !!chr.enabled;
+      els.dbwYarisCampaign.value = yaris.campaign || "";
+      els.dbwYarisEnabled.checked = !!yaris.enabled;
+      const active = dbwActiveCount(s);
+      els.dbwOpenBtn.textContent = active ? "Databowl · " + active + "/4 actif" : "Databowl";
+    }
+
+    function openDbwModal() {
+      els.dbwMsg.textContent = "";
+      els.dbwMsg.className = "settings-msg";
+      loadDbwSettings();
+      els.dbwModalBg.classList.add("open");
+      els.dbwLbxCampaign.focus();
+    }
+
+    function closeDbwModal() {
+      els.dbwModalBg.classList.remove("open");
+    }
+
+    els.dbwOpenBtn.addEventListener("click", openDbwModal);
+    els.dbwCancel.addEventListener("click", closeDbwModal);
+    els.dbwModalBg.addEventListener("click", (e) => { if (e.target === els.dbwModalBg) closeDbwModal(); });
+
+    els.dbwSave.addEventListener("click", async () => {
+      els.dbwMsg.textContent = "";
+      els.dbwMsg.className = "settings-msg";
+      const body = {
+        LBX: {
+          campaign: els.dbwLbxCampaign.value.trim(),
+          enabled: els.dbwLbxEnabled.checked
+        },
+        NX: {
+          campaign: els.dbwNxCampaign.value.trim(),
+          enabled: els.dbwNxEnabled.checked
+        },
+        CHR: {
+          campaign: els.dbwChrCampaign.value.trim(),
+          enabled: els.dbwChrEnabled.checked
+        },
+        YARIS: {
+          campaign: els.dbwYarisCampaign.value.trim(),
+          enabled: els.dbwYarisEnabled.checked
+        }
+      };
+      const res = await fetch("/api/admin/settings/databowl", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        els.dbwMsg.textContent = "Paramètres enregistrés.";
+        els.dbwMsg.className = "settings-msg ok";
+        els.dbwOpenBtn.textContent = (function(){
+          const a = dbwActiveCount(data);
+          return a ? "Databowl · " + a + "/4 actif" : "Databowl";
+        })();
+        setTimeout(closeDbwModal, 800);
+      } else {
+        els.dbwMsg.textContent = data.message || "Enregistrement impossible.";
+        els.dbwMsg.className = "settings-msg err";
+      }
+    });
+
     async function loadStats() {
       const s = await (await fetch("/api/admin/stats")).json();
       els.stats.innerHTML = [
@@ -511,7 +732,7 @@ function renderDashboard() {
         ["Taux de succès", s.success_rate + "<small>%</small>", ""],
         ["Échecs serveur", s.server_validation_failed, "bad"],
         ["Échecs navigateur", s.client_validation_failed, "bad"],
-        ["LBX / NX", (s.by_page.LBX || 0) + " <small>/</small> " + (s.by_page.NX || 0), ""]
+        ["LBX / NX / C-HR+ / YARIS", (s.by_page.LBX || 0) + " <small>/</small> " + (s.by_page.NX || 0) + " <small>/</small> " + (s.by_page.CHR || 0) + " <small>/</small> " + (s.by_page.YARIS || 0), ""]
       ].map(([k, v, cls]) =>
         '<div class="stat ' + cls + '"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'
       ).join("");
@@ -542,10 +763,20 @@ function renderDashboard() {
       const res = await fetch("/api/admin/submissions?" + queryString());
       const data = await res.json();
       const rows = data.rows || [];
+      loadedRows = rows;
       els.count.textContent = data.total + " soumission(s)" + (data.total > rows.length ? " · " + rows.length + " affichées" : "");
       els.empty.style.display = rows.length ? "none" : "block";
       els.rows.innerHTML = rows.map((r) => {
         const db = r.databowl_status ? '<span class="db">' + esc(r.databowl_status) + (r.databowl_lead_id ? " #" + esc(r.databowl_lead_id) : "") + '</span>' : '<span class="db muted">—</span>';
+        const reqBtn = r.databowl_request
+          ? '<button class="btn sm" data-dbw-req="' + r.id + '">Voir</button>'
+          : '<span class="muted">—</span>';
+        const ps = r.powerspace_status
+          ? '<span class="db">' + esc(r.powerspace_status) + (r.click_id ? " · " + esc(r.click_id) : "") + '</span>'
+          : '<span class="db muted">—</span>';
+        const psReqBtn = r.powerspace_request
+          ? '<button class="btn sm" data-ps-req="' + r.id + '">Voir</button>'
+          : '<span class="muted">—</span>';
         return '<tr>' +
           '<td>' + r.id + '</td>' +
           '<td>' + esc(fmtDate(r.created_at)) + '</td>' +
@@ -560,6 +791,9 @@ function renderDashboard() {
           '<td>' + (r.rgpd ? "Oui" : "Non") + '</td>' +
           '<td class="muted">' + esc(r.ip) + '</td>' +
           '<td>' + db + '</td>' +
+          '<td>' + reqBtn + '</td>' +
+          '<td>' + ps + '</td>' +
+          '<td>' + psReqBtn + '</td>' +
           '<td class="muted">' + esc(r.error) + '</td>' +
           '<td class="actions">' +
             '<button class="btn sm" data-edit="' + r.id + '">Éditer</button>' +
@@ -568,6 +802,37 @@ function renderDashboard() {
         '</tr>';
       }).join("");
     }
+
+    function openDbwRequestModal(row) {
+      if (!row) return;
+      els.dbwReqId.textContent = "#" + row.id;
+      els.dbwReqBody.textContent = row.databowl_request || "Aucune requete enregistree.";
+      els.dbwReqModalBg.classList.add("open");
+    }
+
+    function closeDbwRequestModal() {
+      els.dbwReqModalBg.classList.remove("open");
+    }
+
+    function openPsRequestModal(row) {
+      if (!row) return;
+      els.psReqId.textContent = "#" + row.id;
+      els.psReqBody.textContent = row.powerspace_request || "Aucune requete enregistree.";
+      els.psReqModalBg.classList.add("open");
+    }
+
+    function closePsRequestModal() {
+      els.psReqModalBg.classList.remove("open");
+    }
+
+    els.dbwReqClose.addEventListener("click", closeDbwRequestModal);
+    els.dbwReqModalBg.addEventListener("click", (e) => {
+      if (e.target === els.dbwReqModalBg) closeDbwRequestModal();
+    });
+    els.psReqClose.addEventListener("click", closePsRequestModal);
+    els.psReqModalBg.addEventListener("click", (e) => {
+      if (e.target === els.psReqModalBg) closePsRequestModal();
+    });
 
     function refresh() { loadStats(); loadRows(); }
 
@@ -601,6 +866,20 @@ function renderDashboard() {
     document.getElementById("rows").addEventListener("click", async (e) => {
       const del = e.target.closest("[data-del]");
       const edit = e.target.closest("[data-edit]");
+      const dbwReq = e.target.closest("[data-dbw-req]");
+      const psReq = e.target.closest("[data-ps-req]");
+      if (psReq) {
+        const id = psReq.getAttribute("data-ps-req");
+        const row = loadedRows.find((r) => String(r.id) === String(id));
+        openPsRequestModal(row);
+        return;
+      }
+      if (dbwReq) {
+        const id = dbwReq.getAttribute("data-dbw-req");
+        const row = loadedRows.find((r) => String(r.id) === String(id));
+        openDbwRequestModal(row);
+        return;
+      }
       if (del) {
         const id = del.getAttribute("data-del");
         if (!confirm("Supprimer définitivement la soumission #" + id + " ?")) return;
@@ -649,6 +928,7 @@ function renderDashboard() {
 
     refresh();
     loadGaSettings();
+    loadDbwSettings();
   </script>
   ${THEME_TOGGLE_SCRIPT}
 </body>

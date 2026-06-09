@@ -24,12 +24,6 @@ npm start
 - NX  : http://127.0.0.1:8010/modele-nx
 - Admin : http://127.0.0.1:8010/admin/login
 
-### Données de démonstration (optionnel)
-
-```bash
-npm run seed
-```
-
 ## Fonctionnement
 
 - **Toutes** les soumissions sont enregistrees en base avec un statut :
@@ -43,12 +37,36 @@ npm run seed
 
 ### Databowl
 
-L'agence doit fournir `f_859_campaignid`. Sans cette valeur, les leads sont
-enregistres en base mais **non** envoyes a Databowl (statut `not_configured`).
+Les leads valides (statut `success`) sont poussés vers Databowl **uniquement en cas de succès**,
+sans jamais bloquer l'enregistrement en base.
+
+Deux niveaux d'identifiants :
+
+- **`cid` / `sid`** — identifiants techniques d'intégration Databowl, **communs aux deux pages**
+  (valeurs par défaut `628` / `2`, surchargeables via `DATABOWL_CID` / `DATABOWL_SID`).
+- **Code campagne BACS** (champ `f_859_campaignid`) — **propre à chaque page** (LBX / NX) et
+  **différent entre préproduction et production**. C'est la valeur que l'on règle au quotidien.
+
+Le code campagne est **configurable par page** et **modifiable à chaud** depuis le back-office
+(bouton **« Databowl »** du dashboard). On saisit ainsi le code de **préproduction en local**
+et celui de **production en production**.
+
+Ordre de priorité du code campagne : valeur enregistrée dans l'admin > `DATABOWL_<PAGE>_CAMPAIGN`
+> `DATABOWL_CAMPAIGN_ID` (fallback global) > vide. Tant que le code est absent ou la page
+désactivée, les leads sont enregistrés en base mais **non** envoyés à Databowl (statut `not_configured`).
 
 ```bash
-DATABOWL_CAMPAIGN_ID="VALEUR_FOURNIE_PAR_L_AGENCE" npm start
+# Exemple : codes de PREPROD en local
+DATABOWL_LBX_CAMPAIGN=701Aa00001RlRnv \
+DATABOWL_NX_CAMPAIGN=701Aa00001sbScR  npm start
 ```
+
+Codes campagnes fournis par l'agence :
+
+| Page | Pré-prod | Prod |
+|------|----------|------|
+| LBX  | `701Aa00001RlRnv` | `701Sa00002elzpZ` |
+| NX   | `701Aa00001sbScR` | `701Sa00002elGuO` |
 
 ## Back-office (`/admin`)
 
@@ -60,5 +78,6 @@ DATABOWL_CAMPAIGN_ID="VALEUR_FOURNIE_PAR_L_AGENCE" npm start
 
 ## Variables d'environnement
 
-Voir `.env.example` : `PORT`, `DATABOWL_CAMPAIGN_ID`, `ADMIN_USER`, `ADMIN_PASSWORD`,
-`SESSION_SECRET`, `DB_PATH`.
+Voir `.env.example` : `PORT`, `DATABOWL_CID`, `DATABOWL_SID`,
+`DATABOWL_LBX_CAMPAIGN`, `DATABOWL_NX_CAMPAIGN`, `DATABOWL_CAMPAIGN_ID`,
+`ADMIN_USER`, `ADMIN_PASSWORD`, `SESSION_SECRET`, `DB_PATH`.

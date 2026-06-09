@@ -4,13 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lexus LBX - JPO</title>
-  <link rel="icon" href="assets/logo.jpg" type="image/jpeg">
+  <link rel="icon" href="assets/lexus-logo.svg" type="image/svg+xml">
   <meta name="description" content="Lexus LBX hybride auto-rechargeable dès 269 euros par mois en LLD 37 mois, entretien inclus et sans condition de reprise.">
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
-  </script>
-  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-598D767N"></script>
   <style>
     :root {
       --white: #fffaf2;
@@ -107,9 +102,8 @@
       transform: translateX(-50%);
       width: 205px;
       height: 56px;
-      object-fit: cover;
+      object-fit: contain;
       object-position: center;
-      mix-blend-mode: screen;
       display: block;
     }
 
@@ -157,6 +151,17 @@
       font-size: clamp(20px, 1.9vw, 28px);
       line-height: 1.2;
       font-weight: 400;
+    }
+
+    .event-dates {
+      margin: 16px 0 0;
+      color: var(--white);
+      font-size: clamp(24px, 2.4vw, 36px);
+      line-height: 1.2;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .offer {
@@ -243,18 +248,27 @@
     }
 
     .form-stack {
-      align-self: end;
+      align-self: stretch;
       width: 100%;
+      min-height: 0;
       max-height: 100%;
-      display: grid;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
       gap: 12px;
       margin-bottom: 0;
+      overflow: hidden;
     }
 
     .panel {
       width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
       max-height: 100%;
       overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(17, 17, 17, .28) transparent;
       color: #151310;
       background: rgba(255, 251, 245, .5);
       border: 1px solid rgba(255, 255, 255, .62);
@@ -262,6 +276,13 @@
       box-shadow: 0 22px 70px rgba(0, 0, 0, .22);
       backdrop-filter: blur(18px);
       padding: clamp(20px, 2.2vw, 32px);
+    }
+
+    .panel::-webkit-scrollbar { width: 6px; }
+    .panel::-webkit-scrollbar-track { background: transparent; }
+    .panel::-webkit-scrollbar-thumb {
+      background: rgba(17, 17, 17, .22);
+      border-radius: 999px;
     }
 
     .form-title {
@@ -324,7 +345,7 @@
 
     .check {
       display: grid;
-      grid-template-columns: 22px minmax(0, 1fr);
+      grid-template-columns: 26px minmax(0, 1fr);
       gap: 12px;
       align-items: start;
       margin-top: 12px;
@@ -334,17 +355,45 @@
     }
 
     .check input {
-      min-height: 22px;
-      height: 22px;
-      width: 22px;
-      min-width: 22px;
+      min-height: 26px;
+      height: 26px;
+      width: 26px;
+      min-width: 26px;
       padding: 0;
       accent-color: #111;
+      cursor: pointer;
     }
 
     .check a { color: #111; }
 
+    .rgpd-more {
+      margin-top: 8px;
+      color: rgba(17, 17, 17, .55);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .rgpd-more summary {
+      cursor: pointer;
+      color: #111;
+      font-size: 11px;
+      text-decoration: underline;
+      list-style: none;
+      width: max-content;
+    }
+
+    .rgpd-more summary::-webkit-details-marker { display: none; }
+
+    .rgpd-more p {
+      margin: 8px 0 0;
+    }
+
+    .rgpd-more a { color: #111; }
+
     .cta {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
       width: 100%;
       min-height: 48px;
       margin-top: 14px;
@@ -428,7 +477,7 @@
     }
 
     .active .bar::after {
-      content: "102-110 g CO₂/km";
+      content: "103 g CO₂/km";
       white-space: nowrap;
     }
 
@@ -458,6 +507,9 @@
     .success p { margin: 10px 0 0; color: rgba(17, 17, 17, .62); line-height: 1.45; }
 
     .legal {
+      position: relative;
+      z-index: 2;
+      flex-shrink: 0;
       display: grid;
       grid-template-columns: 214px minmax(0, 1fr) 245px;
       gap: 22px;
@@ -593,6 +645,13 @@
         line-height: 1.25;
       }
 
+      .event-dates {
+        margin-top: 10px;
+        font-size: clamp(11px, 3.1vw, 24px);
+        letter-spacing: .04em;
+        line-height: 1.25;
+      }
+
       .offer {
         grid-template-columns: 1fr;
         gap: 6px;
@@ -659,6 +718,7 @@
       }
 
       .cta {
+        position: static;
         min-height: 40px;
         margin-top: 10px;
         font-size: 14px;
@@ -750,6 +810,11 @@
         margin-top: 6px;
       }
 
+      .event-dates {
+        margin-top: 12px;
+        font-size: clamp(20px, 1.8vw, 28px);
+      }
+
       .offer {
         width: min(100%, 470px);
         margin-top: 16px;
@@ -792,54 +857,57 @@
         font-size: 10px;
       }
 
-      .form-stack {
-        align-self: end;
-      }
-
       .panel {
-        padding: 18px;
+        padding: 16px 18px;
       }
 
       .form-title {
-        font-size: 26px;
+        font-size: 22px;
+        line-height: 1.04;
       }
 
       .form-intro {
-        margin: 8px 0 12px;
-        font-size: 13px;
+        margin: 6px 0 10px;
+        font-size: 12px;
+        line-height: 1.3;
       }
 
       .form-grid {
-        gap: 10px;
+        gap: 8px;
+      }
+
+      .field {
+        gap: 4px;
       }
 
       label {
-        font-size: 12px;
+        font-size: 11px;
       }
 
       input,
       select {
-        min-height: 38px;
-        padding: 8px 10px;
+        min-height: 36px;
+        padding: 7px 10px;
         font-size: 14px;
       }
 
       .check {
         margin-top: 8px;
-        font-size: 11px;
-        line-height: 1.25;
-        grid-template-columns: 20px minmax(0, 1fr);
+        font-size: 10px;
+        line-height: 1.2;
+        grid-template-columns: 22px minmax(0, 1fr);
+        gap: 8px;
       }
 
       .check input {
-        min-height: 18px;
-        height: 18px;
-        width: 18px;
-        min-width: 18px;
+        min-height: 22px;
+        height: 22px;
+        width: 22px;
+        min-width: 22px;
       }
 
       .cta {
-        min-height: 42px;
+        min-height: 40px;
         margin-top: 10px;
         font-size: 15px;
       }
@@ -875,24 +943,74 @@
         line-height: 1.18;
       }
     }
+
+    @media (min-width: 861px) and (max-height: 850px) {
+      .stage {
+        padding-bottom: clamp(14px, 2vh, 24px);
+      }
+
+      .panel {
+        padding: 12px 14px;
+      }
+
+      .form-title {
+        font-size: 19px;
+      }
+
+      .form-intro {
+        margin: 4px 0 8px;
+        font-size: 11px;
+        line-height: 1.25;
+      }
+
+      .form-grid {
+        gap: 7px;
+      }
+
+      input,
+      select {
+        min-height: 33px;
+        padding: 6px 9px;
+      }
+
+      .check {
+        margin-top: 6px;
+        font-size: 9px;
+        line-height: 1.18;
+      }
+
+      .cta {
+        min-height: 38px;
+        margin-top: 8px;
+      }
+
+      .legal {
+        padding: 8px clamp(18px, 3vw, 42px) 10px;
+        gap: 12px;
+      }
+
+      .legal p {
+        font-size: 9px;
+        line-height: 1.3;
+      }
+    }
   </style>
 </head>
 <body>
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-598D767N" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="page">
     <div class="bg" aria-hidden="true">
       <img src="assets/lbx-city.jpg" alt="">
     </div>
 
     <header class="topbar" aria-label="En-tête">
-      <img class="logo" src="assets/logo.jpg" alt="Lexus">
-      <p class="top-note">Journées portes ouvertes - 13 et 14 juin 2026</p>
+      <img class="logo" src="assets/lexus-logo.svg" alt="Lexus">
     </header>
 
     <main class="stage">
       <section class="copy" aria-labelledby="hero-title">
         <h1 id="hero-title">LEXUS LBX</h1>
         <p class="model-sub">Hybride auto-rechargeable</p>
+        <p class="event-dates">Journées portes ouvertes : 13 et 14 juin 2026</p>
 
         <div class="offer" aria-label="Offre Lexus LBX">
           <div class="price">
@@ -911,7 +1029,7 @@
         <div class="facts" aria-label="Atouts Lexus LBX">
           <div><strong>Hybride Lexus</strong><span>Sans branchement</span></div>
           <div><strong>Conso. mixte</strong><span>4,5 à 4,8 l/100 km</span></div>
-          <div><strong>CO₂ WLTP</strong><span>102 à 110 g/km</span></div>
+          <div><strong>CO₂ WLTP</strong><span>103 g/km</span></div>
         </div>
       </section>
 
@@ -955,8 +1073,13 @@
 
               <label class="check">
                 <input id="rgpd" name="rgpd" type="checkbox" required>
-                <span>Les informations et données que vous renseignez sur ce formulaire sont nécessaires à la prise en compte de votre demande. Elles font l'objet d'un traitement informatisé mis en œuvre par la division Lexus de Toyota France et peuvent être communiquées à tout concessionnaire et/ou réparateur agréé Lexus à même d'en prendre soin. Elles ne sont conservées que pendant la durée nécessaire à la satisfaction de votre demande. Conformément au RGPD et à la loi française Informatique et Libertés, vous bénéficiez d'un droit d'accès, de modification, d'opposition et de retrait des informations vous concernant, que vous pouvez exercer directement auprès de notre Service Relations Client via <a href="https://www.lexus.fr/informations-legales/politique-generale-confidentialite-protection-donnees" target="_blank" rel="noopener">le lien suivant</a>.</span>
+                <span>J'accepte que les informations renseignées soient utilisées par Lexus (division de Toyota France) pour traiter ma demande de rappel.</span>
               </label>
+
+              <details class="rgpd-more">
+                <summary>Voir les mentions d'information (RGPD)</summary>
+                <p>Les informations et données que vous renseignez sur ce formulaire sont nécessaires à la prise en compte de votre demande. Elles font l'objet d'un traitement informatisé mis en œuvre par la division Lexus de Toyota France et peuvent être communiquées à tout concessionnaire et/ou réparateur agréé Lexus à même d'en prendre soin. Elles ne sont conservées que pendant la durée nécessaire à la satisfaction de votre demande. Conformément au RGPD et à la loi française Informatique et Libertés, vous bénéficiez d'un droit d'accès, de modification, d'opposition et de retrait des informations vous concernant, que vous pouvez exercer directement auprès de notre Service Relations Client via <a href="https://www.lexus.fr/informations-legales/politique-generale-confidentialite-protection-donnees" target="_blank" rel="noopener">le lien suivant</a>.</p>
+              </details>
 
               <button class="cta" type="submit">Être rappelé</button>
               <p class="form-status" id="formStatus" role="alert"></p>
@@ -985,7 +1108,7 @@
           <div class="scale-row f"><span>F</span><span class="bar"></span></div>
           <div class="scale-row g"><span>G</span><span class="bar"></span></div>
         </div>
-        <p><strong>Classe CO₂ : B</strong>LBX : 102-110 g/km, 4,5-4,8 l/100 km.</p>
+        <p><strong>Classe CO₂ : B</strong>LBX : 103 g/km, 4,5-4,8 l/100 km.</p>
       </div>
       <p><sup>(1)</sup> Offre aux particuliers, non cumulable avec toute offre en cours, valable pour un Lexus LBX 2WD neuf commandé avant le 31/07/2026 dans le réseau Lexus participant, en Location Longue Durée, entretien inclus, de 37 mois et 30 000 km, au 1er des 2 termes atteint. 1er loyer majoré de 4 990 €, suivi de 36 loyers de 269 €. Frais de dossier de 150 € inclus dans la première échéance. Sous réserve d'acceptation par Toyota France Financement - RCS 412 653 180 - ORIAS n°D-P3GY-MUFY9-27 consultable sur <a href="https://www.orias.fr" target="_blank" rel="noopener">www.orias.fr</a>. Modèle présenté : Lexus LBX 2WD Cool avec option peinture métallisée neuf à 387 €/mois, 1er loyer majoré 4 990 € aux mêmes conditions. Frais inclus. Voir <a href="https://www.lexus.fr" target="_blank" rel="noopener">Lexus.fr</a>. Consommation et émissions homologuées WLTP ; la consommation réelle varie selon usage, équipements, conditions de circulation et style de conduite. Visuel non contractuel.</p>
       <div class="eco">Pour les trajets courts, privilégiez la marche ou le vélo.<strong>#SeDéplacerMoinsPolluer</strong></div>
@@ -1012,6 +1135,7 @@
       }
     }
 
+    const LEAD_PAGE = "LBX";
     const LEAD_MODELE = "Lexus LBX 2WD";
     const LEAD_OFFRE = "LBX_PART_JUIN_2026";
 
@@ -1102,13 +1226,14 @@
           throw new Error(result.message || "Votre demande n'a pas pu être envoyée.");
         }
 
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: "generate_lead_lbx",
-          modele: payload.modele,
-          offre: payload.offre,
-          databowl_lead_id: result.lead_id || ""
-        });
+        if (typeof lexusTrackLeadSuccess === "function") {
+          lexusTrackLeadSuccess({
+            page: LEAD_PAGE,
+            modele: payload.modele,
+            offre: payload.offre,
+            lead_id: result.id
+          });
+        }
 
         formBlock.style.display = "none";
         successBlock.classList.add("is-visible");

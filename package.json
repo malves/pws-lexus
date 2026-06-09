@@ -5,8 +5,7 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node server.js",
-    "seed": "node seed.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=18"

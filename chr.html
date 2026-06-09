@@ -1,0 +1,1263 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Toyota C-HR+ - JPO</title>
+  <link rel="icon" href="assets/toyota-logo.svg" type="image/svg+xml">
+  <meta name="description" content="Toyota C-HR+ 100 % électrique, 0 g CO₂/km, dès 329 euros par mois en LLD 37 mois, entretien inclus et sous condition de reprise.">
+  <style>
+    :root {
+      --white: #fffaf2;
+      --ink: #10100f;
+      --warm: #fffbf5;
+      --muted: rgba(255, 250, 242, .78);
+      --gold: #bfa36b;
+      --copper: #b5684d;
+      --line: rgba(255, 255, 255, .22);
+      --error: #b23b2f;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: "Toyota Type", "Helvetica Neue", Arial, sans-serif;
+      color: var(--white);
+      background: #090909;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button,
+    input,
+    select { font: inherit; }
+
+    a { color: inherit; }
+
+    .page {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      min-height: 620px;
+      display: grid;
+      grid-template-rows: 62px minmax(0, 1fr) auto;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .bg {
+      position: absolute;
+      inset: 0;
+      z-index: -3;
+    }
+
+    .bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 42%;
+      display: block;
+      filter: brightness(1.12) contrast(.98);
+    }
+
+    .page::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, .24) 0%, rgba(0, 0, 0, .03) 42%, rgba(0, 0, 0, .2) 100%),
+        linear-gradient(180deg, rgba(0, 0, 0, .18) 0%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, .34) 100%);
+      pointer-events: none;
+    }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 110px;
+      z-index: -1;
+      background: linear-gradient(0deg, rgba(0, 0, 0, .74), rgba(0, 0, 0, 0));
+      pointer-events: none;
+    }
+
+    .topbar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 18px;
+      padding: 16px clamp(18px, 3vw, 42px) 0;
+    }
+
+    .logo {
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      transform: translateX(-50%);
+      width: 220px;
+      height: 36px;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+    }
+
+    .top-note {
+      margin: 0;
+      color: var(--white);
+      font-size: 14px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, .34);
+    }
+
+    .stage {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) clamp(360px, 32vw, 460px);
+      gap: clamp(18px, 3vw, 44px);
+      align-items: start;
+      overflow: hidden;
+      padding: 8px clamp(18px, 3vw, 42px) clamp(32px, 4vh, 48px);
+    }
+
+    .copy {
+      align-self: start;
+      max-width: 720px;
+      padding-top: 78px;
+      transform: translateX(clamp(64px, 5vw, 96px));
+      text-shadow: 0 2px 22px rgba(0, 0, 0, .52);
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--white);
+      font-size: clamp(52px, 6.4vw, 96px);
+      line-height: .86;
+      font-weight: 500;
+      letter-spacing: 0;
+      max-width: 730px;
+    }
+
+    h1 .h1-model {
+      white-space: nowrap;
+    }
+
+    .model-sub {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: clamp(20px, 1.9vw, 28px);
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .event-dates {
+      margin: 16px 0 0;
+      color: var(--white);
+      font-size: clamp(24px, 2.4vw, 36px);
+      line-height: 1.2;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .offer {
+      margin-top: 24px;
+      width: min(100%, 650px);
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 255, 255, .34);
+      border-radius: 6px;
+      background: rgba(255, 250, 242, .13);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, .18);
+    }
+
+    .price {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      white-space: nowrap;
+    }
+
+    .price small {
+      color: rgba(255, 250, 242, .78);
+      font-size: 14px;
+    }
+
+    .price strong {
+      color: var(--white);
+      font-size: clamp(58px, 5.7vw, 86px);
+      line-height: .84;
+      font-weight: 500;
+    }
+
+    .price sup {
+      color: var(--gold);
+      font-size: 24px;
+    }
+
+    .offer ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: rgba(255, 250, 242, .86);
+      font-size: 16px;
+      line-height: 1.48;
+    }
+
+    .offer li + li { margin-top: 3px; }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      width: min(100%, 650px);
+      margin-top: 10px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, .2);
+    }
+
+    .facts div {
+      min-height: 54px;
+      padding: 12px 14px;
+      background: rgba(255, 250, 242, .12);
+      backdrop-filter: blur(10px);
+    }
+
+    .facts strong {
+      display: block;
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .facts span {
+      display: block;
+      margin-top: 3px;
+      color: rgba(255, 250, 242, .74);
+      font-size: 13px;
+      line-height: 1.28;
+    }
+
+    .form-stack {
+      align-self: stretch;
+      width: 100%;
+      min-height: 0;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-bottom: 0;
+      overflow: hidden;
+    }
+
+    .panel {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(17, 17, 17, .28) transparent;
+      color: #151310;
+      background: rgba(255, 251, 245, .5);
+      border: 1px solid rgba(255, 255, 255, .62);
+      border-radius: 8px;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, .22);
+      backdrop-filter: blur(18px);
+      padding: clamp(20px, 2.2vw, 32px);
+    }
+
+    .panel::-webkit-scrollbar { width: 6px; }
+    .panel::-webkit-scrollbar-track { background: transparent; }
+    .panel::-webkit-scrollbar-thumb {
+      background: rgba(17, 17, 17, .22);
+      border-radius: 999px;
+    }
+
+    .form-title {
+      margin: 0;
+      color: #111;
+      font-size: clamp(24px, 2.3vw, 34px);
+      line-height: 1.05;
+      font-weight: 500;
+    }
+
+    .form-intro {
+      margin: 10px 0 16px;
+      color: rgba(17, 17, 17, .66);
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      color: rgba(17, 17, 17, .66);
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid rgba(17, 17, 17, .18);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, .72);
+      color: #111;
+      font-size: 15px;
+      padding: 10px 12px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--copper);
+      box-shadow: 0 0 0 3px rgba(181, 104, 77, .16);
+    }
+
+    .is-error input,
+    .is-error select {
+      border-color: var(--error);
+    }
+
+    .check {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      margin-top: 12px;
+      color: rgba(17, 17, 17, .62);
+      font-size: 11px;
+      line-height: 1.32;
+    }
+
+    .check input {
+      min-height: 26px;
+      height: 26px;
+      width: 26px;
+      min-width: 26px;
+      padding: 0;
+      accent-color: #111;
+      cursor: pointer;
+    }
+
+    .check a { color: #111; }
+
+    .rgpd-more {
+      margin-top: 8px;
+      color: rgba(17, 17, 17, .55);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .rgpd-more summary {
+      cursor: pointer;
+      color: #111;
+      font-size: 11px;
+      text-decoration: underline;
+      list-style: none;
+      width: max-content;
+    }
+
+    .rgpd-more summary::-webkit-details-marker { display: none; }
+
+    .rgpd-more p {
+      margin: 8px 0 0;
+    }
+
+    .rgpd-more a { color: #111; }
+
+    .cta {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+      width: 100%;
+      min-height: 48px;
+      margin-top: 14px;
+      border: 0;
+      border-radius: 4px;
+      color: #fff;
+      background: #111;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
+
+    .form-status {
+      display: none;
+      margin: 8px 0 0;
+      color: #7b1f18;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .form-status.is-visible {
+      display: block;
+    }
+
+    .co2 {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      align-content: start;
+      align-items: start;
+      gap: 10px;
+      width: 214px;
+      padding: 10px 12px;
+      color: var(--white);
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 4px;
+      backdrop-filter: blur(10px);
+    }
+
+    .scale {
+      display: grid;
+      gap: 1px;
+    }
+
+    .scale-row {
+      display: grid;
+      grid-template-columns: 11px minmax(0, 1fr);
+      min-height: 8px;
+      align-items: center;
+      color: var(--white);
+      font-size: 6px;
+      font-weight: 700;
+    }
+
+    .scale-row span:first-child { text-align: center; }
+    .bar {
+      height: 8px;
+      clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%);
+    }
+    .a .bar { width: 45%; background: #009a44; }
+    .b .bar { width: 58%; background: #51b848; }
+    .c .bar { width: 70%; background: #bfd730; }
+    .d .bar { width: 82%; background: #ffd100; }
+    .e .bar { width: 90%; background: #f7941d; }
+    .f .bar { width: 96%; background: #ef4136; }
+    .g .bar { width: 100%; background: #b5121b; }
+
+    .active {
+      outline: none;
+    }
+
+    .active .bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding-left: 4px;
+      color: #fff;
+      font-size: 5.8px;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+    }
+
+    .active .bar::after {
+      content: "0 g CO₂/km";
+      white-space: nowrap;
+    }
+
+    .co2 p {
+      margin: 0;
+      color: rgba(255, 250, 242, .68);
+      font-size: 10px;
+      line-height: 1.22;
+    }
+
+    .co2 strong {
+      display: block;
+      color: var(--white);
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
+
+    .success {
+      display: none;
+      min-height: 415px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .success.is-visible { display: grid; }
+    .success strong { display: block; font-size: 28px; font-weight: 500; }
+    .success p { margin: 10px 0 0; color: rgba(17, 17, 17, .62); line-height: 1.45; }
+
+    .legal {
+      position: relative;
+      z-index: 2;
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 214px minmax(0, 1fr) 245px;
+      gap: 22px;
+      align-items: start;
+      padding: 14px clamp(18px, 3vw, 42px) 16px;
+      color: rgba(255, 250, 242, .76);
+      background: rgba(0, 0, 0, .48);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, .14);
+    }
+
+    .legal p {
+      margin: 0;
+      font-size: clamp(11px, .85vw, 13px);
+      line-height: 1.48;
+    }
+
+    .eco {
+      color: rgba(255, 250, 242, .92);
+      font-size: clamp(12px, 1vw, 14px);
+      line-height: 1.35;
+      text-align: right;
+    }
+
+    .eco strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--white);
+    }
+
+    @media (max-width: 860px) {
+      html,
+      body {
+        overflow: auto;
+        height: auto;
+        min-height: 100%;
+      }
+
+      .page {
+        overflow: visible;
+        height: auto;
+        min-height: 100dvh;
+        min-height: 560px;
+        grid-template-rows: auto auto auto;
+      }
+
+      .stage {
+        overflow: visible;
+      }
+
+      .panel {
+        max-height: none;
+        overflow-y: visible;
+      }
+
+      .page::before,
+      .page::after {
+        display: none;
+      }
+
+      .bg {
+        position: relative;
+        inset: auto;
+        z-index: 0;
+        grid-row: 1;
+        grid-column: 1;
+        width: 100%;
+        height: clamp(400px, 82vw, 580px);
+        overflow: hidden;
+      }
+
+      .bg img {
+        object-position: 52% 45%;
+        transform: none;
+      }
+
+      .topbar {
+        grid-row: 1;
+        grid-column: 1;
+        z-index: 2;
+        align-self: start;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px 0;
+      }
+
+      .top-note {
+        max-width: none;
+        font-size: 12px;
+        line-height: 1.3;
+        text-align: center;
+      }
+
+      .logo {
+        position: static;
+        transform: none;
+        width: 168px;
+        height: 28px;
+      }
+
+      .stage {
+        grid-row: 2;
+        grid-column: 1;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 12px 14px 8px;
+        background: #090909;
+      }
+
+      .form-stack {
+        align-self: stretch;
+        margin-bottom: 0;
+        max-height: none;
+      }
+
+      .copy {
+        padding-top: 0;
+        transform: none;
+        text-shadow: none;
+      }
+
+      h1 {
+        font-size: clamp(26px, 7vw, 38px);
+        line-height: 1.05;
+        padding-bottom: 3px;
+      }
+
+      .model-sub {
+        margin-top: 6px;
+        font-size: 14px;
+        line-height: 1.25;
+      }
+
+      .event-dates {
+        margin-top: 10px;
+        font-size: clamp(11px, 3.1vw, 24px);
+        letter-spacing: .04em;
+        line-height: 1.25;
+      }
+
+      .offer {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 8px;
+        margin-top: 10px;
+      }
+
+      .price {
+        gap: 4px;
+      }
+
+      .price strong { font-size: 32px; }
+      .price small { font-size: 11px; }
+      .price sup { font-size: 14px; }
+
+      .offer ul {
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .facts {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .facts div {
+        min-height: 48px;
+        padding: 8px 6px;
+      }
+
+      .facts strong { font-size: 12px; }
+      .facts span { font-size: 11px; }
+
+      .panel {
+        padding: 12px;
+      }
+
+      .form-title { font-size: 18px; }
+      .form-intro { font-size: 12px; margin: 6px 0 10px; }
+      .form-grid { gap: 8px; }
+      .field.full { grid-column: auto; }
+      label { font-size: 12px; }
+
+      input,
+      select {
+        min-height: 36px;
+        padding: 8px 10px;
+        font-size: 16px;
+      }
+
+      .check {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.35;
+        grid-template-columns: 28px minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+      }
+
+      .check input {
+        min-height: 28px;
+        height: 28px;
+        width: 28px;
+        min-width: 28px;
+      }
+
+      .cta {
+        position: static;
+        min-height: 40px;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+
+      .scale-row {
+        min-height: 5px;
+        grid-template-columns: 7px minmax(0, 1fr);
+        font-size: 4px;
+      }
+
+      .bar { height: 5px; }
+      .active .bar { font-size: 3.2px; padding-left: 1px; }
+      .co2 p { display: none; }
+
+      .legal {
+        grid-row: 3;
+        grid-column: 1;
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 12px 14px;
+        padding: 16px 16px 20px;
+        align-items: start;
+      }
+
+      .legal p {
+        grid-row: 1;
+        grid-column: 2;
+        font-size: clamp(11px, 3vw, 13px);
+        line-height: 1.5;
+      }
+
+      .eco {
+        grid-row: 2;
+        grid-column: 2;
+        font-size: 12px;
+        line-height: 1.35;
+        text-align: left;
+      }
+
+      .co2 {
+        grid-row: 1;
+        grid-column: 1;
+        grid-template-columns: 1fr;
+        width: 72px;
+        padding: 3px;
+        gap: 0;
+      }
+    }
+
+    @media (min-width: 861px) and (max-height: 1050px) {
+      .page {
+        grid-template-rows: 58px minmax(0, 1fr) auto;
+        min-height: 0;
+      }
+
+      .topbar {
+        padding-top: 12px;
+      }
+
+      .logo {
+        top: 12px;
+        width: 200px;
+        height: 32px;
+      }
+
+      .top-note {
+        font-size: 12px;
+      }
+
+      .stage {
+        grid-template-columns: minmax(0, 1fr) clamp(340px, 29vw, 420px);
+        gap: 28px;
+        padding-top: 0;
+        padding-bottom: clamp(40px, 5vh, 56px);
+      }
+
+      .copy {
+        padding-top: 26px;
+        max-width: 510px;
+      }
+
+      h1 {
+        font-size: clamp(48px, 5.3vw, 72px);
+        line-height: .9;
+      }
+
+      .model-sub {
+        font-size: clamp(17px, 1.45vw, 22px);
+        margin-top: 6px;
+      }
+
+      .event-dates {
+        margin-top: 12px;
+        font-size: clamp(20px, 1.8vw, 28px);
+      }
+
+      .offer {
+        width: min(100%, 470px);
+        margin-top: 16px;
+        padding: 12px 14px;
+        gap: 14px;
+      }
+
+      .price strong {
+        font-size: clamp(42px, 4.6vw, 60px);
+      }
+
+      .price small {
+        font-size: 11px;
+      }
+
+      .price sup {
+        font-size: 18px;
+      }
+
+      .offer ul {
+        font-size: 13px;
+        line-height: 1.34;
+      }
+
+      .facts {
+        width: min(100%, 470px);
+        margin-top: 8px;
+      }
+
+      .facts div {
+        min-height: 46px;
+        padding: 8px 10px;
+      }
+
+      .facts strong {
+        font-size: 12px;
+      }
+
+      .facts span {
+        font-size: 10px;
+      }
+
+      .panel {
+        padding: 16px 18px;
+      }
+
+      .form-title {
+        font-size: 22px;
+        line-height: 1.04;
+      }
+
+      .form-intro {
+        margin: 6px 0 10px;
+        font-size: 12px;
+        line-height: 1.3;
+      }
+
+      .form-grid {
+        gap: 8px;
+      }
+
+      .field {
+        gap: 4px;
+      }
+
+      label {
+        font-size: 11px;
+      }
+
+      input,
+      select {
+        min-height: 36px;
+        padding: 7px 10px;
+        font-size: 14px;
+      }
+
+      .check {
+        margin-top: 8px;
+        font-size: 10px;
+        line-height: 1.2;
+        grid-template-columns: 22px minmax(0, 1fr);
+        gap: 8px;
+      }
+
+      .check input {
+        min-height: 22px;
+        height: 22px;
+        width: 22px;
+        min-width: 22px;
+      }
+
+      .cta {
+        min-height: 40px;
+        margin-top: 10px;
+        font-size: 15px;
+      }
+
+      .scale-row {
+        min-height: 9px;
+        grid-template-columns: 13px minmax(0, 1fr);
+        font-size: 6px;
+      }
+
+      .bar {
+        height: 9px;
+      }
+
+      .legal {
+        grid-template-columns: 190px minmax(0, 1fr) 210px;
+        gap: 16px;
+        padding: 10px clamp(18px, 3vw, 42px) 12px;
+      }
+
+      .legal p {
+        font-size: clamp(10px, .85vw, 12px);
+        line-height: 1.38;
+      }
+
+      .co2 {
+        width: 190px;
+        padding: 6px 8px;
+      }
+
+      .co2 p {
+        font-size: 9px;
+        line-height: 1.18;
+      }
+    }
+
+    @media (min-width: 861px) and (max-height: 850px) {
+      .stage {
+        padding-bottom: clamp(14px, 2vh, 24px);
+      }
+
+      .panel {
+        padding: 12px 14px;
+      }
+
+      .form-title {
+        font-size: 19px;
+      }
+
+      .form-intro {
+        margin: 4px 0 8px;
+        font-size: 11px;
+        line-height: 1.25;
+      }
+
+      .form-grid {
+        gap: 7px;
+      }
+
+      input,
+      select {
+        min-height: 33px;
+        padding: 6px 9px;
+      }
+
+      .check {
+        margin-top: 6px;
+        font-size: 9px;
+        line-height: 1.18;
+      }
+
+      .cta {
+        min-height: 38px;
+        margin-top: 8px;
+      }
+
+      .legal {
+        padding: 8px clamp(18px, 3vw, 42px) 10px;
+        gap: 12px;
+      }
+
+      .legal p {
+        font-size: 9px;
+        line-height: 1.3;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="bg" aria-hidden="true">
+      <img src="assets/chr-toyota.jpg" alt="">
+    </div>
+
+    <header class="topbar" aria-label="En-tête">
+      <img class="logo" src="assets/toyota-logo.svg" alt="Toyota">
+    </header>
+
+    <main class="stage">
+      <section class="copy" aria-labelledby="hero-title">
+        <h1 id="hero-title">TOYOTA&nbsp;<span class="h1-model">C-HR+</span></h1>
+        <p class="model-sub">100 % électrique</p>
+        <p class="event-dates">Journées portes ouvertes : 13 et 14 juin 2026</p>
+
+        <div class="offer" aria-label="Offre Toyota C-HR+">
+          <div class="price">
+            <small>Dès</small>
+            <strong>329</strong>
+            <sup>€</sup>
+            <small>/mois (1)</small>
+          </div>
+          <ul>
+            <li>Entretien inclus et sous condition de reprise</li>
+            <li>LLD 37 mois - 30 000 km</li>
+            <li>1er loyer 4 390 €, puis 36 loyers de 329 €</li>
+          </ul>
+        </div>
+
+        <div class="facts" aria-label="Atouts Toyota C-HR+">
+          <div><strong>100 % électrique</strong><span>Jusqu'à 607 km d'autonomie WLTP</span></div>
+          <div><strong>Recharge rapide</strong><span>10-80 % en 28 min (150 kW)</span></div>
+          <div><strong>CO₂ WLTP</strong><span>0 g/km</span></div>
+        </div>
+      </section>
+
+      <aside class="form-stack" id="contact" aria-label="Formulaire de rappel">
+        <div class="panel">
+          <div id="formBlock">
+            <p class="form-title">Faire un essai gratuitement<br>près de chez vous</p>
+            <p class="form-intro">Votre concession Toyota vous recontacte pour finaliser votre demande.</p>
+
+            <form id="leadForm" novalidate aria-describedby="formStatus">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="civilite">Civilité</label>
+                  <select id="civilite" name="civilite" required>
+                    <option value="">Sélectionner</option>
+                    <option value="Mme">Mme</option>
+                    <option value="M">M.</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="prenom">Prénom *</label>
+                  <input id="prenom" name="prenom" autocomplete="given-name" required>
+                </div>
+                <div class="field full">
+                  <label for="nom">Nom *</label>
+                  <input id="nom" name="nom" autocomplete="family-name" required>
+                </div>
+                <div class="field full">
+                  <label for="email">Email *</label>
+                  <input id="email" name="email" type="email" autocomplete="email" required>
+                </div>
+                <div class="field full">
+                  <label for="telephone">Téléphone *</label>
+                  <input id="telephone" name="telephone" type="tel" autocomplete="tel" required>
+                </div>
+                <div class="field full">
+                  <label for="concession">Concession souhaitée</label>
+                  <input id="concession" name="concession" placeholder="Ville ou code postal">
+                </div>
+              </div>
+
+              <label class="check">
+                <input id="rgpd" name="rgpd" type="checkbox" required>
+                <span>J'accepte que les informations renseignées soient utilisées par Toyota France pour traiter ma demande de rappel.</span>
+              </label>
+
+              <details class="rgpd-more">
+                <summary>Voir les mentions d'information (RGPD)</summary>
+                <p>Les informations et données que vous renseignez sur ce formulaire sont nécessaires à la prise en compte de votre demande. Elles font l'objet d'un traitement informatisé mis en œuvre par Toyota France et peuvent être communiquées à tout concessionnaire et/ou réparateur agréé Toyota à même d'en prendre soin. Elles ne sont conservées que pendant la durée nécessaire à la satisfaction de votre demande. Conformément au RGPD et à la loi française Informatique et Libertés, vous bénéficiez d'un droit d'accès, de modification, d'opposition et de retrait des informations vous concernant, que vous pouvez exercer directement auprès de notre Service Relations Client via <a href="https://www.toyota.fr/informations-legales/politique-generale-confidentialite-protection-donnees" target="_blank" rel="noopener">le lien suivant</a>.</p>
+              </details>
+
+              <button class="cta" type="submit">Être rappelé</button>
+              <p class="form-status" id="formStatus" role="alert"></p>
+            </form>
+          </div>
+
+          <div class="success" id="successBlock" role="status" aria-live="polite">
+            <div>
+              <strong>Demande envoyée</strong>
+              <p>Merci. Un conseiller Toyota vous recontactera prochainement.</p>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+    </main>
+
+    <footer class="legal">
+      <div class="co2" aria-label="Étiquette émissions CO2">
+        <div class="scale" aria-hidden="true">
+          <div class="scale-row a active"><span>A</span><span class="bar"></span></div>
+          <div class="scale-row b"><span>B</span><span class="bar"></span></div>
+          <div class="scale-row c"><span>C</span><span class="bar"></span></div>
+          <div class="scale-row d"><span>D</span><span class="bar"></span></div>
+          <div class="scale-row e"><span>E</span><span class="bar"></span></div>
+          <div class="scale-row f"><span>F</span><span class="bar"></span></div>
+          <div class="scale-row g"><span>G</span><span class="bar"></span></div>
+        </div>
+        <p><strong>Classe CO₂ : A</strong> — C-HR+ : 0 g/km.</p>
+      </div>
+      <p><sup>(1)</sup> Offre aux particuliers, non cumulable avec toute offre en cours, valable pour un Toyota C-HR+ neuf commandé avant le 31/07/2026 dans le réseau Toyota participant, en Location Longue Durée, entretien inclus, de 37 mois et 30 000 km, au 1er des 2 termes atteint. 1er loyer majoré de 4 390 €, suivi de 36 loyers de 329 €. Frais de dossier de 150 € inclus dans la première échéance. Sous réserve d'acceptation par Toyota France Financement - RCS 412 653 180 - ORIAS n°D-P3GY-MUFY9-27 consultable sur <a href="https://www.orias.fr" target="_blank" rel="noopener">www.orias.fr</a>. Modèle présenté : Toyota C-HR+ Design Grande Autonomie neuf aux mêmes conditions. Frais inclus. Voir <a href="https://www.toyota.fr" target="_blank" rel="noopener">Toyota.fr</a>. Autonomie et émissions homologuées WLTP ; l'autonomie réelle varie selon usage, équipements, conditions de circulation et style de conduite. Visuel non contractuel.</p>
+      <div class="eco">Pour les trajets courts, privilégiez la marche ou le vélo.<strong>#SeDéplacerMoinsPolluer</strong></div>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.querySelector("#leadForm");
+    const formBlock = document.querySelector("#formBlock");
+    const successBlock = document.querySelector("#successBlock");
+    const formStatus = document.querySelector("#formStatus");
+    const submitButton = form.querySelector(".cta");
+
+    function setError(field, hasError) {
+      const wrap = field.closest(".field") || field.closest(".check");
+      if (wrap) wrap.classList.toggle("is-error", hasError);
+      field.setAttribute("aria-invalid", hasError ? "true" : "false");
+    }
+
+    function clearGlobalError() {
+      if (!form.querySelector(".is-error")) {
+        formStatus.textContent = "";
+        formStatus.classList.remove("is-visible");
+      }
+    }
+
+    const LEAD_PAGE = "CHR";
+    const LEAD_MODELE = "Toyota C-HR+";
+    const LEAD_OFFRE = "CHR_PART_JUIN_2026";
+
+    // Envoi des echecs de validation cote navigateur, avec anti-doublons (clics rapproches).
+    let lastTrackSig = "";
+    let lastTrackAt = 0;
+    function trackClientFailure(missing) {
+      const data = Object.fromEntries(new FormData(form).entries());
+      const sig = missing.slice().sort().join(",");
+      const now = Date.now();
+      if (sig === lastTrackSig && now - lastTrackAt < 5000) return;
+      lastTrackSig = sig;
+      lastTrackAt = now;
+      data.modele = LEAD_MODELE;
+      data.offre = LEAD_OFFRE;
+      data.rgpd = document.querySelector("#rgpd").checked;
+      data.page_url = window.location.href;
+      data.missing = missing;
+      try {
+        navigator.sendBeacon
+          ? navigator.sendBeacon("/api/track", new Blob([JSON.stringify(data)], { type: "application/json" }))
+          : fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data), keepalive: true });
+      } catch (e) {}
+    }
+
+    async function readApiResponse(response) {
+      const text = await response.text();
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json") && text) {
+        try {
+          return JSON.parse(text);
+        } catch {
+          throw new Error("Réponse serveur invalide. Merci de réessayer.");
+        }
+      }
+      if (response.status === 502 || response.status === 503 || response.status === 504) {
+        throw new Error("Le serveur est momentanément indisponible. Merci de réessayer dans quelques instants.");
+      }
+      throw new Error("Une erreur est survenue. Merci de réessayer.");
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      let valid = true;
+      const missing = [];
+      formStatus.textContent = "";
+      formStatus.classList.remove("is-visible");
+
+      form.querySelectorAll("[required]").forEach((field) => {
+        const empty = field.type === "checkbox" ? !field.checked : !field.value.trim();
+        const badEmail = field.type === "email" && field.value && !field.checkValidity();
+        const hasError = empty || badEmail;
+        setError(field, hasError);
+        if (hasError) {
+          valid = false;
+          missing.push(field.name || field.id);
+        }
+      });
+
+      if (!valid) {
+        formStatus.textContent =
+          "Merci de renseigner les champs obligatoires et de cocher la case RGPD.";
+        formStatus.classList.add("is-visible");
+        form.querySelector(".is-error input, .is-error select")?.focus();
+        trackClientFailure(missing);
+        return;
+      }
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+      payload.modele = LEAD_MODELE;
+      payload.offre = LEAD_OFFRE;
+      payload.rgpd = document.querySelector("#rgpd").checked;
+      payload.timestamp = new Date().toISOString();
+      payload.page_url = window.location.href;
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Envoi en cours...";
+
+      try {
+        const response = await fetch("/api/lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await readApiResponse(response);
+
+        if (!response.ok || result.result !== "created") {
+          throw new Error(result.message || "Votre demande n'a pas pu être envoyée.");
+        }
+
+        if (typeof lexusTrackLeadSuccess === "function") {
+          lexusTrackLeadSuccess({
+            page: LEAD_PAGE,
+            modele: payload.modele,
+            offre: payload.offre,
+            lead_id: result.id
+          });
+        }
+
+        formBlock.style.display = "none";
+        successBlock.classList.add("is-visible");
+      } catch (error) {
+        formStatus.textContent = error.message || "Une erreur est survenue. Merci de réessayer.";
+        formStatus.classList.add("is-visible");
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Être rappelé";
+      }
+    });
+
+    form.querySelectorAll("input, select").forEach((field) => {
+      field.addEventListener("input", () => {
+        setError(field, false);
+        clearGlobalError();
+      });
+      field.addEventListener("change", () => {
+        setError(field, false);
+        clearGlobalError();
+      });
+    });
+  </script>
+</body>
+</html>

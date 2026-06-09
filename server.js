@@ -11,17 +11,23 @@ const { renderLogin, renderDashboard } = require("./admin/pages");
 const PORT = Number(process.env.PORT || 8010);
 const ROOT = __dirname;
 const DATABOWL_ENDPOINT = "https://neo.databowl.com/api/v1/lead";
-const DATABOWL_CAMPAIGN_ID = process.env.DATABOWL_CAMPAIGN_ID || "";
-
+const POWERSPACE_ENDPOINT = "https://a.pwspace.com/ld";
+// Identifiants techniques d'integration Databowl (communs aux deux pages).
+const DATABOWL_CID = process.env.DATABOWL_CID || "628";
+const DATABOWL_SID = process.env.DATABOWL_SID || "1189";
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
 const SESSION_SECRET = process.env.SESSION_SECRET || "dev-secret-change-me";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 heures
 const COOKIE_NAME = "lexus_admin";
+const CLICK_ID_COOKIE = "lexus_click_id";
+const CLICK_ID_MAX_AGE_SEC = 60 * 60 * 24 * 30; // 30 jours
 
 const LANDING_ROUTES = {
   "/modele-lbx": "index.html",
-  "/modele-nx": "nx.html"
+  "/modele-nx": "nx.html",
+  "/modele-chr": "chr.html",
+  "/modele-yaris-cross": "yaris-cross.html"
 };
 
 const MIME_TYPES = {
@@ -32,6 +38,7 @@ const MIME_TYPES = {
   ".jpeg": "image/jpeg",
   ".png": "image/png",
   ".webp": "image/webp",
+  ".svg": "image/svg+xml",
   ".ico": "image/x-icon"
 };
 
@@ -157,6 +164,32 @@ function clearSessionCookie(res) {
   res.setHeader("Set-Cookie", `${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0`);
 }
 
+function normalizeClickIdParam(key) {
+  return String(key).toLowerCase().replace(/[-_]/g, "");
+}
+
+function extractClickIdFromQuery(searchParams) {
+  for (const [key, value] of searchParams.entries()) {
+    if (normalizeClickIdParam(key) !== "clickid") continue;
+    const trimmed = String(value || "").trim();
+    if (trimmed) return trimmed;
+  }
+  return null;
+}
+
+function setClickIdCookie(res, clickId) {
+  const encoded = encodeURIComponent(clickId);
+  res.appendHeader(
+    "Set-Cookie",
+    `${CLICK_ID_COOKIE}=${encoded}; Path=/; SameSite=Lax; Max-Age=${CLICK_ID_MAX_AGE_SEC}`
+  );
+}
+
+function syncClickIdCookieFromUrl(req, res, url) {
+  const clickId = extractClickIdFromQuery(url.searchParams);
+  if (clickId) setClickIdCookie(res, clickId);
+}
+
 function safeEqual(a, b) {
   const ab = Buffer.from(String(a));
   const bb = Buffer.from(String(b));
@@ -172,10 +205,44 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function detectPage(lead) {
   const fromUrl = String(lead.page_url || "").toLowerCase();
+  if (fromUrl.includes("modele-yaris-cross") || fromUrl.includes("yaris-cross.html")) return "YARIS";
+  if (fromUrl.includes("modele-chr") || fromUrl.includes("chr.html")) return "CHR";
   if (fromUrl.includes("modele-nx") || fromUrl.includes("nx.html")) return "NX";
   if (fromUrl.includes("modele-lbx") || fromUrl.includes("index.html")) return "LBX";
   const model = String(lead.modele || "").toLowerCase();
+  if (model.includes("yaris cross") || model.includes("yaris-cross")) return "YARIS";
+  if (model.includes("c-hr+") || model.includes("c-hr") || model.includes("chr")) return "CHR";
   return model.includes("nx") ? "NX" : "LBX";
+}
+
+function getPageMeta(page) {
+  const metas = {
+    YARIS: {
+      brand: "Toyota",
+      model: "Toyota Yaris Cross",
+      offer: "YARIS_CROSS_PART_JUIN_2026",
+      landing: "Toyota Yaris Cross"
+    },
+    CHR: {
+      brand: "Toyota",
+      model: "Toyota C-HR+",
+      offer: "CHR_PART_JUIN_2026",
+      landing: "Toyota C-HR+"
+    },
+    NX: {
+      brand: "Lexus",
+      model: "Lexus NX",
+      offer: "NX_PART_JUIN_2026",
+      landing: "Lexus NX"
+    },
+    LBX: {
+      brand: "Lexus",
+      model: "Lexus LBX",
+      offer: "LBX_PART_JUIN_2026",
+      landing: "Lexus LBX"
+    }
+  };
+  return metas[page] || metas.LBX;
 }
 
 function validateLead(lead) {
@@ -188,26 +255,26 @@ function validateLead(lead) {
   return errors;
 }
 
-function buildDatabowlPayload(lead, page) {
+function buildDatabowlPayload(lead, page, cfg) {
   const params = new URLSearchParams();
-  const modelName = page === "NX" ? "Lexus NX" : "Lexus LBX";
-  const offerCode = lead.offre || (page === "NX" ? "NX_PART_JUIN_2026" : "LBX_PART_JUIN_2026");
+  const meta = getPageMeta(page);
+  const offerCode = lead.offre || meta.offer;
 
-  params.set("cid", "628");
-  params.set("sid", "2");
+  params.set("cid", DATABOWL_CID);
+  params.set("sid", DATABOWL_SID);
   params.set("f_1_email", lead.email || "");
   params.set("f_2_title", lead.civilite || "");
   params.set("f_3_firstname", lead.prenom || "");
   params.set("f_4_lastname", lead.nom || "");
   params.set("f_12_phone1", lead.telephone || "");
-  params.set("f_859_campaignid", DATABOWL_CAMPAIGN_ID);
-  params.set("f_1354_wishedmodellexus", modelName);
-  params.set("f_760_wishedbrand", "Lexus");
+  params.set("f_859_campaignid", cfg.campaign || "");
+  params.set("f_1354_wishedmodellexus", meta.model);
+  params.set("f_760_wishedbrand", meta.brand);
   params.set("f_769_wishedfinancingtype", "LLD");
   params.set(
     "f_762_comments",
     [
-      `Landing ${modelName} JPO`,
+      `Landing ${meta.landing} JPO`,
       `Offre: ${offerCode}`,
       lead.concession ? `Concession souhaitee: ${lead.concession}` : "",
       `RGPD: ${lead.rgpd ? "true" : "false"}`,
@@ -220,17 +287,41 @@ function buildDatabowlPayload(lead, page) {
   return params;
 }
 
+function formatDatabowlRequest(body) {
+  const lines = [];
+  for (const [key, value] of new URLSearchParams(body)) {
+    lines.push(`${key}=${value}`);
+  }
+  return [
+    `POST ${DATABOWL_ENDPOINT}`,
+    "Content-Type: application/x-www-form-urlencoded",
+    "",
+    ...lines
+  ].join("\n");
+}
+
 // Appel Databowl independant : ne bloque jamais l'enregistrement en base.
+// Le code campagne BACS est propre a chaque page (LBX / NX) et configurable
+// dans l'admin (preprod en local, prod en production).
 async function pushToDatabowl(id, lead, page) {
-  if (!DATABOWL_CAMPAIGN_ID) {
-    db.updateSubmissionDatabowl(id, "not_configured", null);
+  const cfg = db.getDatabowlPageSettings(page);
+  const body = buildDatabowlPayload(lead, page, cfg).toString();
+  const requestLog = formatDatabowlRequest(body);
+
+  if (!cfg.enabled || !cfg.campaign || !DATABOWL_CID || !DATABOWL_SID) {
+    db.updateSubmissionDatabowl(
+      id,
+      "not_configured",
+      null,
+      `${requestLog}\n\n[non envoye: configuration incomplete]`
+    );
     return;
   }
   try {
     const response = await fetch(DATABOWL_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: buildDatabowlPayload(lead, page).toString()
+      body
     });
     const text = await response.text();
     let json;
@@ -239,13 +330,41 @@ async function pushToDatabowl(id, lead, page) {
     } catch {
       json = {};
     }
+    const fullLog = `${requestLog}\n\n--- Reponse HTTP ${response.status} ---\n${text}`;
     if (response.ok && json.result === "created") {
-      db.updateSubmissionDatabowl(id, "created", json.lead_id || "");
+      db.updateSubmissionDatabowl(id, "created", json.lead_id || "", fullLog);
     } else {
-      db.updateSubmissionDatabowl(id, "rejected", null);
+      db.updateSubmissionDatabowl(id, "rejected", null, fullLog);
     }
   } catch (error) {
-    db.updateSubmissionDatabowl(id, "error", null);
+    db.updateSubmissionDatabowl(
+      id,
+      "error",
+      null,
+      `${requestLog}\n\n--- Erreur reseau ---\n${error.message || "erreur inconnue"}`
+    );
+  }
+}
+
+// Appel PowerSpace (pixel lead) : uniquement si un ClickID a ete capture en cookie.
+async function pushToPowerSpace(id, clickId) {
+  const url = `${POWERSPACE_ENDPOINT}?qci=${encodeURIComponent(clickId)}`;
+  const requestLog = `GET ${url}`;
+  try {
+    const response = await fetch(url);
+    const text = await response.text();
+    const fullLog = `${requestLog}\n\n--- Reponse HTTP ${response.status} ---\n${text}`;
+    if (response.ok) {
+      db.updateSubmissionPowerSpace(id, "success", fullLog);
+    } else {
+      db.updateSubmissionPowerSpace(id, "rejected", fullLog);
+    }
+  } catch (error) {
+    db.updateSubmissionPowerSpace(
+      id,
+      "error",
+      `${requestLog}\n\n--- Erreur reseau ---\n${error.message || "erreur inconnue"}`
+    );
   }
 }
 
@@ -261,6 +380,8 @@ async function handleLead(req, res) {
     const page = detectPage(lead);
     const ip = getClientIp(req);
     const referer = req.headers["referer"] || req.headers["referrer"] || "";
+    const cookies = parseCookies(req);
+    const clickId = cookies[CLICK_ID_COOKIE] || null;
     const errors = validateLead(lead);
 
     const base = {
@@ -276,7 +397,8 @@ async function handleLead(req, res) {
       offre: lead.offre,
       rgpd: lead.rgpd,
       ip,
-      referer
+      referer,
+      click_id: clickId
     };
 
     // Echec de validation cote serveur : enregistre puis refuse.
@@ -294,6 +416,13 @@ async function handleLead(req, res) {
 
     // Databowl est appele en parallele, sans bloquer la reponse de succes.
     pushToDatabowl(id, lead, page).catch(() => {});
+
+    // PowerSpace : uniquement si un ClickID est present (cookie issu du query param a l'arrivee).
+    if (clickId) {
+      pushToPowerSpace(id, clickId).catch(() => {});
+    } else {
+      db.updateSubmissionPowerSpace(id, "skipped", "[non envoye: aucun ClickID]");
+    }
 
     return sendJson(res, 200, { result: "created", id });
   } catch (error) {
@@ -380,7 +509,13 @@ function handleAdminApi(req, res, url) {
         .then((body) => {
           const id = String(body.measurement_id || "").trim();
           const enabled = !!body.enabled;
-          if (enabled && id && !/^G-[A-Z0-9]+$/i.test(id)) {
+          if (enabled && !id) {
+            return sendJson(res, 400, {
+              ok: false,
+              message: "Saisissez un ID de mesure GA4 (ex. G-XXXXXXXXXX) pour activer le tracking."
+            });
+          }
+          if (enabled && !/^G-[A-Z0-9]+$/i.test(id)) {
             return sendJson(res, 400, {
               ok: false,
               message: "ID de mesure invalide (format attendu : G-XXXXXXXXXX)."
@@ -388,6 +523,39 @@ function handleAdminApi(req, res, url) {
           }
           db.setAnalyticsSettings({ enabled, measurement_id: id });
           return sendJson(res, 200, { ok: true, ...db.getAnalyticsSettings() });
+        })
+        .catch(() => sendJson(res, 400, { ok: false, message: "Requete invalide." }));
+    }
+  }
+
+  if (resource === "settings" && parts[3] === "databowl") {
+    if (req.method === "GET") {
+      return sendJson(res, 200, db.getDatabowlSettings());
+    }
+    if (req.method === "PUT" || req.method === "PATCH") {
+      return readJson(req)
+        .then((body) => {
+          const settings = {};
+          for (const page of db.DATABOWL_PAGES) {
+            const raw = body[page] || {};
+            const campaign = String(raw.campaign || "").trim();
+            const enabled = !!raw.enabled;
+            if (campaign && !/^[A-Za-z0-9._-]+$/.test(campaign)) {
+              return sendJson(res, 400, {
+                ok: false,
+                message: `Databowl ${page} : code campagne invalide.`
+              });
+            }
+            if (enabled && !campaign) {
+              return sendJson(res, 400, {
+                ok: false,
+                message: `Databowl ${page} : le code campagne est requis pour activer l'envoi.`
+              });
+            }
+            settings[page] = { enabled, campaign };
+          }
+          db.setDatabowlSettings(settings);
+          return sendJson(res, 200, { ok: true, ...db.getDatabowlSettings() });
         })
         .catch(() => sendJson(res, 400, { ok: false, message: "Requete invalide." }));
     }
@@ -435,6 +603,9 @@ function handleAdminApi(req, res, url) {
 // --------------------------------------------------------------------------
 // Static
 // --------------------------------------------------------------------------
+const PLAUSIBLE_SCRIPT =
+  '<script defer data-domain="journeesportesouvertes-lexus.fr" src="https://plausible.kleekr.com/js/script.js"></script>';
+
 function buildGaSnippet(measurementId) {
   const id = String(measurementId || "").trim();
   if (!id) return "";
@@ -446,18 +617,49 @@ function buildGaSnippet(measurementId) {
   gtag('js', new Date());
 
   gtag('config', '${id}');
+  window.lexusTrackLeadSuccess = function (opts) {
+    if (typeof gtag !== "function") return;
+    var o = opts || {};
+    gtag("event", "generate_lead", {
+      page: o.page || "",
+      modele: o.modele || "",
+      offre: o.offre || "",
+      lead_id: o.lead_id != null ? String(o.lead_id) : ""
+    });
+  };
 </script>`;
 }
 
-function injectGaScript(html) {
-  const config = db.getAnalyticsSettings();
-  if (!config.enabled || !config.measurement_id) return html;
-  const snippet = buildGaSnippet(config.measurement_id);
-  if (!snippet) return html;
-  if (html.includes("</head>")) {
-    return html.replace("</head>", `${snippet}\n</head>`);
+const CLICK_ID_CAPTURE_SCRIPT = `<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var clickId = null;
+  params.forEach(function (value, key) {
+    if (clickId) return;
+    var k = String(key).toLowerCase().replace(/[-_]/g, "");
+    if (k === "clickid" && String(value || "").trim()) clickId = String(value).trim();
+  });
+  if (!clickId) return;
+  document.cookie = "${CLICK_ID_COOKIE}=" + encodeURIComponent(clickId) + "; Path=/; SameSite=Lax; Max-Age=${CLICK_ID_MAX_AGE_SEC}";
+})();
+</script>`;
+
+function injectHeadScripts(html) {
+  let out = html;
+  if (!out.includes("lexus_click_id") && out.includes("</head>")) {
+    out = out.replace("</head>", `${CLICK_ID_CAPTURE_SCRIPT}\n</head>`);
   }
-  return html;
+  if (!out.includes("plausible.kleekr.com") && out.includes("</head>")) {
+    out = out.replace("</head>", `${PLAUSIBLE_SCRIPT}\n</head>`);
+  }
+  const config = db.getAnalyticsSettings();
+  if (!config.enabled || !config.measurement_id) return out;
+  const snippet = buildGaSnippet(config.measurement_id);
+  if (!snippet) return out;
+  if (out.includes("</head>")) {
+    return out.replace("</head>", `${snippet}\n</head>`);
+  }
+  return out;
 }
 
 function sendHtmlFile(res, filePath) {
@@ -467,7 +669,7 @@ function sendHtmlFile(res, filePath) {
       return res.end("Not found");
     }
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.end(injectGaScript(content));
+    res.end(injectHeadScripts(content));
   });
 }
 
@@ -485,14 +687,17 @@ function sendFile(res, filePath) {
 }
 
 function serveStatic(req, res) {
-  const urlPath = decodeURIComponent(new URL(req.url, `http://${req.headers.host}`).pathname);
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const urlPath = decodeURIComponent(url.pathname);
 
   if (urlPath === "/") {
+    syncClickIdCookieFromUrl(req, res, url);
     return sendHtmlFile(res, path.join(ROOT, "home.html"));
   }
 
   const landingFile = LANDING_ROUTES[urlPath];
   if (landingFile) {
+    syncClickIdCookieFromUrl(req, res, url);
     const landingPath = path.join(ROOT, landingFile);
     if (!landingPath.startsWith(ROOT)) {
       res.writeHead(403);
@@ -570,10 +775,25 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Lexus landing + admin server running on http://127.0.0.1:${PORT}`);
-  console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX)`);
+  console.log(`Landings JPO + admin server running on http://127.0.0.1:${PORT}`);
+  console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX) · /modele-chr (C-HR+) · /modele-yaris-cross (YARIS)`);
   console.log(`  Admin    : /admin/login`);
-  if (!DATABOWL_CAMPAIGN_ID) {
-    console.log("  [info] DATABOWL_CAMPAIGN_ID absent : leads enregistres en base mais non envoyes a Databowl.");
+  console.log(`  [databowl] cid=${DATABOWL_CID} sid=${DATABOWL_SID}`);
+  const dbw = db.getDatabowlSettings();
+  for (const page of db.DATABOWL_PAGES) {
+    const cfg = dbw[page];
+    if (cfg.enabled && cfg.campaign) {
+      console.log(`  [databowl] ${page} actif : campagne=${cfg.campaign}`);
+    } else {
+      console.log(`  [databowl] ${page} non configure : leads enregistres en base mais non envoyes a Databowl.`);
+    }
+  }
+  const ga = db.getAnalyticsSettings();
+  if (ga.enabled && ga.measurement_id) {
+    console.log(`  [analytics] actif : ${ga.measurement_id}`);
+  } else if (ga.enabled) {
+    console.log(`  [analytics] active en base mais sans ID de mesure : tag non injecte.`);
+  } else {
+    console.log(`  [analytics] inactif (admin ou GA_ENABLED / GA_MEASUREMENT_ID).`);
   }
 });
