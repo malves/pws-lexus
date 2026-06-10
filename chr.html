@@ -1107,8 +1107,17 @@
                   <input id="telephone" name="telephone" type="tel" autocomplete="tel" required>
                 </div>
                 <div class="field full">
-                  <label for="concession">Concession souhaitée</label>
-                  <input id="concession" name="concession" placeholder="Ville ou code postal">
+                  <label for="concession">Code postal *</label>
+                  <input
+                    id="concession"
+                    name="concession"
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                    pattern="[0-9]{5}"
+                    maxlength="5"
+                    placeholder="Code postal"
+                    required
+                  >
                 </div>
               </div>
 
@@ -1257,7 +1266,8 @@ Offre réservée aux particuliers, non cumulable avec toute autre offre en cours
       form.querySelectorAll("[required]").forEach((field) => {
         const empty = field.type === "checkbox" ? !field.checked : !field.value.trim();
         const badEmail = field.type === "email" && field.value && !field.checkValidity();
-        const hasError = empty || badEmail;
+        const badZipcode = field.name === "concession" && field.value && !/^\d{5}$/.test(field.value.trim());
+        const hasError = empty || badEmail || badZipcode;
         setError(field, hasError);
         if (hasError) {
           valid = false;
@@ -1267,7 +1277,7 @@ Offre réservée aux particuliers, non cumulable avec toute autre offre en cours
 
       if (!valid) {
         formStatus.textContent =
-          "Merci de renseigner les champs obligatoires et de cocher la case RGPD.";
+          "Merci de renseigner les champs obligatoires, un code postal valide à 5 chiffres, et de cocher la case RGPD.";
         formStatus.classList.add("is-visible");
         form.querySelector(".is-error input, .is-error select")?.focus();
         trackClientFailure(missing);

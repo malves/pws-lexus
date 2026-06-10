@@ -12,6 +12,7 @@ const PORT = Number(process.env.PORT || 8010);
 const ROOT = __dirname;
 const DATABOWL_ENDPOINT = "https://neo.databowl.com/api/v1/lead";
 const POWERSPACE_ENDPOINT = "https://a.pwspace.com/ld";
+
 // Identifiants techniques d'integration Databowl (communs aux deux pages).
 const DATABOWL_CID = process.env.DATABOWL_CID || "628";
 const DATABOWL_SID = process.env.DATABOWL_SID || "1189";
@@ -200,8 +201,9 @@ function safeEqual(a, b) {
 // --------------------------------------------------------------------------
 // Leads
 // --------------------------------------------------------------------------
-const REQUIRED_FIELDS = ["civilite", "prenom", "nom", "email", "telephone"];
+const REQUIRED_FIELDS = ["civilite", "prenom", "nom", "email", "telephone", "concession"];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ZIPCODE_RE = /^\d{5}$/;
 
 function detectPage(lead) {
   const fromUrl = String(lead.page_url || "").toLowerCase();
@@ -247,11 +249,23 @@ function getPageMeta(page) {
 
 function validateLead(lead) {
   const errors = [];
+
   for (const field of REQUIRED_FIELDS) {
     if (!String(lead[field] || "").trim()) errors.push(`${field} manquant`);
   }
-  if (lead.email && !EMAIL_RE.test(String(lead.email))) errors.push("email invalide");
-  if (!lead.rgpd) errors.push("RGPD non accepte");
+
+  if (lead.email && !EMAIL_RE.test(String(lead.email))) {
+    errors.push("email invalide");
+  }
+
+  if (lead.concession && !ZIPCODE_RE.test(String(lead.concession).trim())) {
+    errors.push("code postal invalide");
+  }
+
+  if (!lead.rgpd) {
+    errors.push("RGPD non accepte");
+  }
+
   return errors;
 }
 
@@ -267,6 +281,7 @@ function buildDatabowlPayload(lead, page, cfg) {
   params.set("f_3_firstname", lead.prenom || "");
   params.set("f_4_lastname", lead.nom || "");
   params.set("f_12_phone1", lead.telephone || "");
+  params.set("f_39_zipcode", String(lead.concession || "").trim());
   params.set("f_859_campaignid", cfg.campaign || "");
   params.set("f_1354_wishedmodellexus", meta.model);
   params.set("f_760_wishedbrand", meta.brand);
@@ -276,7 +291,7 @@ function buildDatabowlPayload(lead, page, cfg) {
     [
       `Landing ${meta.landing} JPO`,
       `Offre: ${offerCode}`,
-      lead.concession ? `Concession souhaitee: ${lead.concession}` : "",
+      lead.concession ? `Code postal: ${lead.concession}` : "",
       `RGPD: ${lead.rgpd ? "true" : "false"}`,
       `URL: ${lead.page_url || ""}`
     ]
@@ -317,20 +332,25 @@ async function pushToDatabowl(id, lead, page) {
     );
     return;
   }
+
   try {
     const response = await fetch(DATABOWL_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body
     });
+
     const text = await response.text();
     let json;
+
     try {
       json = JSON.parse(text);
     } catch {
       json = {};
     }
+
     const fullLog = `${requestLog}\n\n--- Reponse HTTP ${response.status} ---\n${text}`;
+
     if (response.ok && json.result === "created") {
       db.updateSubmissionDatabowl(id, "created", json.lead_id || "", fullLog);
     } else {
@@ -340,7 +360,6 @@ async function pushToDatabowl(id, lead, page) {
     db.updateSubmissionDatabowl(
       id,
       "error",
-      null,
       `${requestLog}\n\n--- Erreur reseau ---\n${error.message || "erreur inconnue"}`
     );
   }
@@ -350,10 +369,12 @@ async function pushToDatabowl(id, lead, page) {
 async function pushToPowerSpace(id, clickId) {
   const url = `${POWERSPACE_ENDPOINT}?qci=${encodeURIComponent(clickId)}`;
   const requestLog = `GET ${url}`;
+
   try {
     const response = await fetch(url);
     const text = await response.text();
     const fullLog = `${requestLog}\n\n--- Reponse HTTP ${response.status} ---\n${text}`;
+
     if (response.ok) {
       db.updateSubmissionPowerSpace(id, "success", fullLog);
     } else {
@@ -370,6 +391,7 @@ async function pushToPowerSpace(id, clickId) {
 
 async function handleLead(req, res) {
   let lead;
+
   try {
     lead = await readJson(req);
   } catch {
@@ -408,7 +430,11 @@ async function handleLead(req, res) {
         status: "server_validation_failed",
         error: errors.join(", ")
       });
-      return sendJson(res, 400, { result: "error", message: "Champs obligatoires manquants." });
+
+      return sendJson(res, 400, {
+        result: "error",
+        message: "Champs obligatoires manquants ou code postal invalide."
+      });
     }
 
     // Soumission valide : enregistree comme succes (independamment de Databowl).
@@ -427,6 +453,7 @@ async function handleLead(req, res) {
     return sendJson(res, 200, { result: "created", id });
   } catch (error) {
     console.error("[api/lead]", error);
+
     return sendJson(res, 500, {
       result: "error",
       message: "Erreur interne. Merci de reessayer dans quelques instants."
@@ -437,12 +464,15 @@ async function handleLead(req, res) {
 // Echecs de validation cote navigateur (avant l'envoi reseau du lead).
 async function handleTrack(req, res) {
   let payload;
+
   try {
     payload = await readJson(req);
   } catch {
     return sendJson(res, 400, { result: "error" });
   }
+
   const page = detectPage(payload);
+
   db.insertSubmission({
     status: "client_validation_failed",
     page,
@@ -460,6 +490,7 @@ async function handleTrack(req, res) {
     referer: req.headers["referer"] || "",
     error: Array.isArray(payload.missing) ? payload.missing.join(", ") : payload.error || ""
   });
+
   return sendJson(res, 200, { result: "ok" });
 }
 
@@ -475,16 +506,20 @@ function requireAuth(req, res) {
 
 async function handleLogin(req, res) {
   let body;
+
   try {
     body = await readJson(req);
   } catch {
     return sendJson(res, 400, { ok: false, message: "Requete invalide." });
   }
+
   const userOk = safeEqual(body.user || "", ADMIN_USER);
   const passOk = safeEqual(body.password || "", ADMIN_PASSWORD);
+
   if (!userOk || !passOk) {
     return sendJson(res, 401, { ok: false, message: "Identifiants incorrects." });
   }
+
   setSessionCookie(res, createSessionToken(ADMIN_USER));
   return sendJson(res, 200, { ok: true });
 }
@@ -492,7 +527,7 @@ async function handleLogin(req, res) {
 function handleAdminApi(req, res, url) {
   if (!isAuthed(req)) return sendJson(res, 401, { error: "non authentifie" });
 
-  const parts = url.pathname.split("/").filter(Boolean); // ['api','admin','submissions', :id?]
+  const parts = url.pathname.split("/").filter(Boolean);
   const resource = parts[2];
   const idPart = parts[3];
 
@@ -504,23 +539,27 @@ function handleAdminApi(req, res, url) {
     if (req.method === "GET") {
       return sendJson(res, 200, db.getAnalyticsSettings());
     }
+
     if (req.method === "PUT" || req.method === "PATCH") {
       return readJson(req)
         .then((body) => {
           const id = String(body.measurement_id || "").trim();
           const enabled = !!body.enabled;
+
           if (enabled && !id) {
             return sendJson(res, 400, {
               ok: false,
               message: "Saisissez un ID de mesure GA4 (ex. G-XXXXXXXXXX) pour activer le tracking."
             });
           }
+
           if (enabled && !/^G-[A-Z0-9]+$/i.test(id)) {
             return sendJson(res, 400, {
               ok: false,
               message: "ID de mesure invalide (format attendu : G-XXXXXXXXXX)."
             });
           }
+
           db.setAnalyticsSettings({ enabled, measurement_id: id });
           return sendJson(res, 200, { ok: true, ...db.getAnalyticsSettings() });
         })
@@ -532,28 +571,34 @@ function handleAdminApi(req, res, url) {
     if (req.method === "GET") {
       return sendJson(res, 200, db.getDatabowlSettings());
     }
+
     if (req.method === "PUT" || req.method === "PATCH") {
       return readJson(req)
         .then((body) => {
           const settings = {};
+
           for (const page of db.DATABOWL_PAGES) {
             const raw = body[page] || {};
             const campaign = String(raw.campaign || "").trim();
             const enabled = !!raw.enabled;
+
             if (campaign && !/^[A-Za-z0-9._-]+$/.test(campaign)) {
               return sendJson(res, 400, {
                 ok: false,
                 message: `Databowl ${page} : code campagne invalide.`
               });
             }
+
             if (enabled && !campaign) {
               return sendJson(res, 400, {
                 ok: false,
                 message: `Databowl ${page} : le code campagne est requis pour activer l'envoi.`
               });
             }
+
             settings[page] = { enabled, campaign };
           }
+
           db.setDatabowlSettings(settings);
           return sendJson(res, 200, { ok: true, ...db.getDatabowlSettings() });
         })
@@ -573,10 +618,12 @@ function handleAdminApi(req, res, url) {
         sort_by: url.searchParams.get("sort_by") || undefined,
         sort_dir: url.searchParams.get("sort_dir") || undefined
       };
+
       return sendJson(res, 200, db.listSubmissions(filters));
     }
 
     const id = Number(idPart);
+
     if (idPart && !Number.isInteger(id)) {
       return sendJson(res, 400, { error: "id invalide" });
     }
@@ -590,7 +637,14 @@ function handleAdminApi(req, res, url) {
       return readJson(req)
         .then((fields) => {
           const changes = db.updateSubmission(id, fields);
-          if (!changes) return sendJson(res, 404, { ok: false, message: "Ligne introuvable ou aucun champ modifiable." });
+
+          if (!changes) {
+            return sendJson(res, 404, {
+              ok: false,
+              message: "Ligne introuvable ou aucun champ modifiable."
+            });
+          }
+
           return sendJson(res, 200, { ok: true, submission: db.getSubmission(id) });
         })
         .catch(() => sendJson(res, 400, { ok: false, message: "Requete invalide." }));
@@ -609,6 +663,7 @@ const PLAUSIBLE_SCRIPT =
 function buildGaSnippet(measurementId) {
   const id = String(measurementId || "").trim();
   if (!id) return "";
+
   return `<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>
 <script>
@@ -646,19 +701,27 @@ const CLICK_ID_CAPTURE_SCRIPT = `<script>
 
 function injectHeadScripts(html) {
   let out = html;
+
   if (!out.includes("lexus_click_id") && out.includes("</head>")) {
     out = out.replace("</head>", `${CLICK_ID_CAPTURE_SCRIPT}\n</head>`);
   }
+
   if (!out.includes("plausible.kleekr.com") && out.includes("</head>")) {
     out = out.replace("</head>", `${PLAUSIBLE_SCRIPT}\n</head>`);
   }
+
   const config = db.getAnalyticsSettings();
+
   if (!config.enabled || !config.measurement_id) return out;
+
   const snippet = buildGaSnippet(config.measurement_id);
+
   if (!snippet) return out;
+
   if (out.includes("</head>")) {
     return out.replace("</head>", `${snippet}\n</head>`);
   }
+
   return out;
 }
 
@@ -668,6 +731,7 @@ function sendHtmlFile(res, filePath) {
       res.writeHead(404);
       return res.end("Not found");
     }
+
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end(injectHeadScripts(content));
   });
@@ -679,9 +743,11 @@ function sendFile(res, filePath) {
       res.writeHead(404);
       return res.end("Not found");
     }
+
     res.writeHead(200, {
       "Content-Type": MIME_TYPES[path.extname(filePath)] || "application/octet-stream"
     });
+
     res.end(content);
   });
 }
@@ -696,23 +762,29 @@ function serveStatic(req, res) {
   }
 
   const landingFile = LANDING_ROUTES[urlPath];
+
   if (landingFile) {
     syncClickIdCookieFromUrl(req, res, url);
+
     const landingPath = path.join(ROOT, landingFile);
+
     if (!landingPath.startsWith(ROOT)) {
       res.writeHead(403);
       return res.end("Forbidden");
     }
+
     return sendHtmlFile(res, landingPath);
   }
 
   const isAsset = urlPath.startsWith("/assets/");
+
   if (!isAsset) {
     res.writeHead(404);
     return res.end("Not found");
   }
 
   const filePath = path.normalize(path.join(ROOT, urlPath));
+
   if (!filePath.startsWith(ROOT)) {
     res.writeHead(403);
     return res.end("Forbidden");
@@ -725,6 +797,7 @@ function runAsync(handler) {
   return (req, res) => {
     Promise.resolve(handler(req, res)).catch((error) => {
       console.error(`[${req.method} ${req.url}]`, error);
+
       if (!res.headersSent) {
         sendJson(res, 500, { result: "error", message: "Erreur interne." });
       }
@@ -745,6 +818,7 @@ const server = http.createServer((req, res) => {
 
   // Auth
   if (req.method === "POST" && pathname === "/admin/login") return runAsync(handleLogin)(req, res);
+
   if (pathname === "/admin/logout") {
     clearSessionCookie(res);
     res.writeHead(302, { Location: "/admin/login" });
@@ -757,8 +831,10 @@ const server = http.createServer((req, res) => {
       res.writeHead(302, { Location: "/admin/dashboard" });
       return res.end();
     }
+
     return sendHtml(res, 200, renderLogin());
   }
+
   if (req.method === "GET" && (pathname === "/admin" || pathname === "/admin/dashboard")) {
     if (!requireAuth(req, res)) return;
     return sendHtml(res, 200, renderDashboard());
@@ -779,16 +855,21 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX) · /modele-chr (C-HR+) · /modele-yaris-cross (YARIS)`);
   console.log(`  Admin    : /admin/login`);
   console.log(`  [databowl] cid=${DATABOWL_CID} sid=${DATABOWL_SID}`);
+
   const dbw = db.getDatabowlSettings();
+
   for (const page of db.DATABOWL_PAGES) {
     const cfg = dbw[page];
+
     if (cfg.enabled && cfg.campaign) {
       console.log(`  [databowl] ${page} actif : campagne=${cfg.campaign}`);
     } else {
       console.log(`  [databowl] ${page} non configure : leads enregistres en base mais non envoyes a Databowl.`);
     }
   }
+
   const ga = db.getAnalyticsSettings();
+
   if (ga.enabled && ga.measurement_id) {
     console.log(`  [analytics] actif : ${ga.measurement_id}`);
   } else if (ga.enabled) {
