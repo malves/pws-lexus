@@ -300,6 +300,22 @@ function renderDashboard() {
     }
     .dbw-page-title .muted { letter-spacing: 0; text-transform: none; }
     .dbw-page .grid { margin-top: 12px; }
+    .dbw-params { margin-top: 14px; }
+    .dbw-params-title {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .04em; color: var(--muted); margin-bottom: 8px;
+    }
+    .dbw-param-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .dbw-param-row .dbw-param-name { flex: 0 0 42%; }
+    .dbw-param-row .dbw-param-value { flex: 1 1 auto; }
+    .dbw-param-row input {
+      width: 100%; padding: 8px 10px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--input-bg, transparent);
+      color: inherit; font: inherit;
+    }
+    .dbw-param-del { flex: 0 0 auto; padding: 6px 10px; line-height: 1; }
+    .dbw-param-empty { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .dbw-params-add { margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -445,7 +461,7 @@ function renderDashboard() {
   <div class="modal-bg" id="dbwModalBg">
     <div class="modal">
       <h3>Databowl</h3>
-      <p class="hint">Configuration propre à chaque page : code campagne BACS (champ <code>f_859_campaignid</code>) et identifiants techniques <strong>cid</strong> / <strong>sid</strong>. Les leads valides ne sont envoyés que si la page est activée (campagne, cid et sid renseignés).</p>
+      <p class="hint">Configuration propre à chaque page : code campagne BACS (champ <code>f_859_campaignid</code>) et identifiants techniques <strong>cid</strong> / <strong>sid</strong>. Les leads valides ne sont envoyés que si la page est activée (campagne, cid et sid renseignés). Vous pouvez aussi ajouter des <strong>paramètres personnalisés</strong> (nom de la variable + valeur) envoyés à Databowl pour la page concernée.</p>
       <div class="dbw-page">
         <div class="dbw-page-title">Page LBX <span class="muted">· /modele-lbx</span></div>
         <div class="row full">
@@ -465,6 +481,11 @@ function renderDashboard() {
         <div class="toggle">
           <input id="dbwLbxEnabled" type="checkbox">
           <label for="dbwLbxEnabled">Activer l'envoi des leads LBX</label>
+        </div>
+        <div class="dbw-params">
+          <div class="dbw-params-title">Paramètres personnalisés</div>
+          <div class="dbw-params-list" id="dbwLbxParams"></div>
+          <button type="button" class="btn sm dbw-params-add" data-dbw-add="LBX">+ Ajouter un paramètre</button>
         </div>
       </div>
       <div class="dbw-page">
@@ -487,6 +508,11 @@ function renderDashboard() {
           <input id="dbwNxEnabled" type="checkbox">
           <label for="dbwNxEnabled">Activer l'envoi des leads NX</label>
         </div>
+        <div class="dbw-params">
+          <div class="dbw-params-title">Paramètres personnalisés</div>
+          <div class="dbw-params-list" id="dbwNxParams"></div>
+          <button type="button" class="btn sm dbw-params-add" data-dbw-add="NX">+ Ajouter un paramètre</button>
+        </div>
       </div>
       <div class="dbw-page">
         <div class="dbw-page-title">Page C-HR+ <span class="muted">· /modele-chr</span></div>
@@ -508,6 +534,11 @@ function renderDashboard() {
           <input id="dbwChrEnabled" type="checkbox">
           <label for="dbwChrEnabled">Activer l'envoi des leads C-HR+</label>
         </div>
+        <div class="dbw-params">
+          <div class="dbw-params-title">Paramètres personnalisés</div>
+          <div class="dbw-params-list" id="dbwChrParams"></div>
+          <button type="button" class="btn sm dbw-params-add" data-dbw-add="CHR">+ Ajouter un paramètre</button>
+        </div>
       </div>
       <div class="dbw-page">
         <div class="dbw-page-title">Page YARIS <span class="muted">· /modele-yaris-cross</span></div>
@@ -528,6 +559,11 @@ function renderDashboard() {
         <div class="toggle">
           <input id="dbwYarisEnabled" type="checkbox">
           <label for="dbwYarisEnabled">Activer l'envoi des leads YARIS</label>
+        </div>
+        <div class="dbw-params">
+          <div class="dbw-params-title">Paramètres personnalisés</div>
+          <div class="dbw-params-list" id="dbwYarisParams"></div>
+          <button type="button" class="btn sm dbw-params-add" data-dbw-add="YARIS">+ Ajouter un paramètre</button>
         </div>
       </div>
       <p class="settings-msg" id="dbwMsg" role="status"></p>
@@ -577,6 +613,11 @@ function renderDashboard() {
       dbwYarisCid: document.getElementById("dbwYarisCid"),
       dbwYarisSid: document.getElementById("dbwYarisSid"),
       dbwYarisEnabled: document.getElementById("dbwYarisEnabled"),
+      dbwLbxParams: document.getElementById("dbwLbxParams"),
+      dbwNxParams: document.getElementById("dbwNxParams"),
+      dbwChrParams: document.getElementById("dbwChrParams"),
+      dbwYarisParams: document.getElementById("dbwYarisParams"),
+      dbwModal: document.getElementById("dbwModalBg"),
       dbwSave: document.getElementById("dbwSave"),
       dbwCancel: document.getElementById("dbwCancel"),
       dbwMsg: document.getElementById("dbwMsg"),
@@ -702,6 +743,87 @@ function renderDashboard() {
       return n;
     }
 
+    const DBW_PARAM_LISTS = {
+      LBX: function () { return els.dbwLbxParams; },
+      NX: function () { return els.dbwNxParams; },
+      CHR: function () { return els.dbwChrParams; },
+      YARIS: function () { return els.dbwYarisParams; }
+    };
+
+    function dbwParamEmptyHint(listEl) {
+      const hasRows = listEl.querySelector(".dbw-param-row");
+      let hint = listEl.querySelector(".dbw-param-empty");
+      if (hasRows) {
+        if (hint) hint.remove();
+      } else if (!hint) {
+        hint = document.createElement("div");
+        hint.className = "dbw-param-empty";
+        hint.textContent = "Aucun paramètre personnalisé.";
+        listEl.appendChild(hint);
+      }
+    }
+
+    function addDbwParamRow(listEl, name, value) {
+      const empty = listEl.querySelector(".dbw-param-empty");
+      if (empty) empty.remove();
+      const row = document.createElement("div");
+      row.className = "dbw-param-row";
+      const n = document.createElement("input");
+      n.className = "dbw-param-name";
+      n.type = "text";
+      n.placeholder = "nom (ex: f_900_source)";
+      n.autocomplete = "off";
+      n.spellcheck = false;
+      n.value = name || "";
+      const v = document.createElement("input");
+      v.className = "dbw-param-value";
+      v.type = "text";
+      v.placeholder = "valeur";
+      v.autocomplete = "off";
+      v.spellcheck = false;
+      v.value = value || "";
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "btn sm danger dbw-param-del";
+      del.textContent = "×";
+      del.title = "Supprimer ce paramètre";
+      del.addEventListener("click", function () {
+        row.remove();
+        dbwParamEmptyHint(listEl);
+      });
+      row.appendChild(n);
+      row.appendChild(v);
+      row.appendChild(del);
+      listEl.appendChild(row);
+    }
+
+    function renderDbwParams(listEl, params) {
+      listEl.innerHTML = "";
+      (params || []).forEach(function (p) { addDbwParamRow(listEl, p.name, p.value); });
+      dbwParamEmptyHint(listEl);
+    }
+
+    function collectDbwParams(listEl) {
+      const out = [];
+      listEl.querySelectorAll(".dbw-param-row").forEach(function (row) {
+        const name = row.querySelector(".dbw-param-name").value.trim();
+        const value = row.querySelector(".dbw-param-value").value.trim();
+        if (name) out.push({ name: name, value: value });
+      });
+      return out;
+    }
+
+    els.dbwModal.addEventListener("click", function (e) {
+      const btn = e.target.closest("[data-dbw-add]");
+      if (!btn) return;
+      const getList = DBW_PARAM_LISTS[btn.getAttribute("data-dbw-add")];
+      if (!getList) return;
+      const listEl = getList();
+      addDbwParamRow(listEl, "", "");
+      const inputs = listEl.querySelectorAll(".dbw-param-row .dbw-param-name");
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+
     async function loadDbwSettings() {
       const s = await (await fetch("/api/admin/settings/databowl")).json();
       const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, yaris = s.YARIS || {};
@@ -709,18 +831,22 @@ function renderDashboard() {
       els.dbwLbxCid.value = lbx.cid || "";
       els.dbwLbxSid.value = lbx.sid || "";
       els.dbwLbxEnabled.checked = !!lbx.enabled;
+      renderDbwParams(els.dbwLbxParams, lbx.params);
       els.dbwNxCampaign.value = nx.campaign || "";
       els.dbwNxCid.value = nx.cid || "";
       els.dbwNxSid.value = nx.sid || "";
       els.dbwNxEnabled.checked = !!nx.enabled;
+      renderDbwParams(els.dbwNxParams, nx.params);
       els.dbwChrCampaign.value = chr.campaign || "";
       els.dbwChrCid.value = chr.cid || "";
       els.dbwChrSid.value = chr.sid || "";
       els.dbwChrEnabled.checked = !!chr.enabled;
+      renderDbwParams(els.dbwChrParams, chr.params);
       els.dbwYarisCampaign.value = yaris.campaign || "";
       els.dbwYarisCid.value = yaris.cid || "";
       els.dbwYarisSid.value = yaris.sid || "";
       els.dbwYarisEnabled.checked = !!yaris.enabled;
+      renderDbwParams(els.dbwYarisParams, yaris.params);
       const active = dbwActiveCount(s);
       els.dbwOpenBtn.textContent = active ? "Databowl · " + active + "/4 actif" : "Databowl";
     }
@@ -749,25 +875,29 @@ function renderDashboard() {
           campaign: els.dbwLbxCampaign.value.trim(),
           cid: els.dbwLbxCid.value.trim(),
           sid: els.dbwLbxSid.value.trim(),
-          enabled: els.dbwLbxEnabled.checked
+          enabled: els.dbwLbxEnabled.checked,
+          params: collectDbwParams(els.dbwLbxParams)
         },
         NX: {
           campaign: els.dbwNxCampaign.value.trim(),
           cid: els.dbwNxCid.value.trim(),
           sid: els.dbwNxSid.value.trim(),
-          enabled: els.dbwNxEnabled.checked
+          enabled: els.dbwNxEnabled.checked,
+          params: collectDbwParams(els.dbwNxParams)
         },
         CHR: {
           campaign: els.dbwChrCampaign.value.trim(),
           cid: els.dbwChrCid.value.trim(),
           sid: els.dbwChrSid.value.trim(),
-          enabled: els.dbwChrEnabled.checked
+          enabled: els.dbwChrEnabled.checked,
+          params: collectDbwParams(els.dbwChrParams)
         },
         YARIS: {
           campaign: els.dbwYarisCampaign.value.trim(),
           cid: els.dbwYarisCid.value.trim(),
           sid: els.dbwYarisSid.value.trim(),
-          enabled: els.dbwYarisEnabled.checked
+          enabled: els.dbwYarisEnabled.checked,
+          params: collectDbwParams(els.dbwYarisParams)
         }
       };
       const res = await fetch("/api/admin/settings/databowl", {

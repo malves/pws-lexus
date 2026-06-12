@@ -105,6 +105,25 @@ const DEFAULT_DATABOWL_SETTINGS = {
   YARIS: { campaign: "701Sa00002enXXV", cid: "364", sid: "1189" }
 };
 
+// Les paramètres personnalisés sont stockés en JSON : un tableau d'objets
+// { name, value } ajoutés dynamiquement depuis l'admin et envoyés à Databowl.
+function parseDatabowlParams(raw) {
+  if (!raw) return [];
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .map((p) => ({
+      name: String((p && p.name) || "").trim(),
+      value: String((p && p.value) != null ? p.value : "").trim()
+    }))
+    .filter((p) => p.name);
+}
+
 function getDatabowlPageSettings(page) {
   const p = String(page).toUpperCase();
   const key = p.toLowerCase();
@@ -116,7 +135,8 @@ function getDatabowlPageSettings(page) {
     `databowl_${key}_enabled`,
     campaign && cid && sid ? "1" : "0"
   );
-  return { enabled: enabledRaw === "1", campaign, cid, sid };
+  const params = parseDatabowlParams(getSetting(`databowl_${key}_params`, ""));
+  return { enabled: enabledRaw === "1", campaign, cid, sid, params };
 }
 
 function getDatabowlSettings() {
@@ -134,6 +154,10 @@ function setDatabowlSettings(settings = {}) {
     setSetting(`databowl_${key}_campaign`, cfg.campaign || "");
     setSetting(`databowl_${key}_cid`, cfg.cid || "");
     setSetting(`databowl_${key}_sid`, cfg.sid || "");
+    setSetting(
+      `databowl_${key}_params`,
+      JSON.stringify(parseDatabowlParams(JSON.stringify(cfg.params || [])))
+    );
   }
   return getDatabowlSettings();
 }

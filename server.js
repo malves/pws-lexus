@@ -282,7 +282,8 @@ function buildDatabowlPayload(lead, page, cfg) {
   params.set("f_12_phone1", lead.telephone || "");
   params.set("f_39_zipcode", String(lead.concession || "").trim());
   params.set("f_859_campaignid", cfg.campaign || "");
-  params.set("f_1354_wishedmodellexus", meta.model);
+  // params.set("f_1354_wishedmodellexus", meta.model);
+  // params.set("f_761_wishedmodel", meta.model);
   params.set("f_760_wishedbrand", meta.brand);
   params.set("f_769_wishedfinancingtype", "LLD");
   params.set(
@@ -297,6 +298,14 @@ function buildDatabowlPayload(lead, page, cfg) {
       .filter(Boolean)
       .join(" | ")
   );
+
+  // Paramètres personnalisés configurés par page dans l'admin. Ils sont
+  // appliqués en dernier afin de pouvoir surcharger les valeurs par défaut.
+  if (Array.isArray(cfg.params)) {
+    for (const { name, value } of cfg.params) {
+      if (name) params.set(name, value != null ? value : "");
+    }
+  }
 
   return params;
 }
@@ -611,7 +620,22 @@ function handleAdminApi(req, res, url) {
               });
             }
 
-            settings[page] = { enabled, campaign, cid, sid };
+            const params = [];
+            const rawParams = Array.isArray(raw.params) ? raw.params : [];
+            for (const item of rawParams) {
+              const name = String((item && item.name) || "").trim();
+              const value = String((item && item.value) != null ? item.value : "").trim();
+              if (!name) continue;
+              if (!/^[A-Za-z0-9._-]+$/.test(name)) {
+                return sendJson(res, 400, {
+                  ok: false,
+                  message: `Databowl ${page} : nom de paramètre invalide « ${name} » (lettres, chiffres, . _ - uniquement).`
+                });
+              }
+              params.push({ name, value });
+            }
+
+            settings[page] = { enabled, campaign, cid, sid, params };
           }
 
           db.setDatabowlSettings(settings);
