@@ -13,9 +13,11 @@ const ROOT = __dirname;
 const DATABOWL_ENDPOINT = "https://neo.databowl.com/api/v1/lead";
 const POWERSPACE_ENDPOINT = "https://a.pwspace.com/ld";
 
-// Identifiants techniques d'integration Databowl (communs aux deux pages).
-const DATABOWL_CID = process.env.DATABOWL_CID || "628";
-const DATABOWL_SID = process.env.DATABOWL_SID || "1189";
+// Identifiants techniques d'integration Databowl par marque.
+const DATABOWL_LEXUS_CID = process.env.DATABOWL_LEXUS_CID || "628";
+const DATABOWL_LEXUS_SID = process.env.DATABOWL_LEXUS_SID || "1189";
+const DATABOWL_TOYOTA_CID = process.env.DATABOWL_TOYOTA_CID || "364";
+const DATABOWL_TOYOTA_SID = process.env.DATABOWL_TOYOTA_SID || "1189";
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
 const SESSION_SECRET = process.env.SESSION_SECRET || "dev-secret-change-me";
@@ -273,9 +275,10 @@ function buildDatabowlPayload(lead, page, cfg) {
   const params = new URLSearchParams();
   const meta = getPageMeta(page);
   const offerCode = lead.offre || meta.offer;
+  const integration = getDatabowlIntegration(meta.brand);
 
-  params.set("cid", DATABOWL_CID);
-  params.set("sid", DATABOWL_SID);
+  params.set("cid", integration.cid);
+  params.set("sid", integration.sid);
   params.set("f_1_email", lead.email || "");
   params.set("f_2_title", lead.civilite || "");
   params.set("f_3_firstname", lead.prenom || "");
@@ -302,6 +305,14 @@ function buildDatabowlPayload(lead, page, cfg) {
   return params;
 }
 
+function getDatabowlIntegration(brand) {
+  if (String(brand).toLowerCase() === "toyota") {
+    return { cid: DATABOWL_TOYOTA_CID, sid: DATABOWL_TOYOTA_SID };
+  }
+
+  return { cid: DATABOWL_LEXUS_CID, sid: DATABOWL_LEXUS_SID };
+}
+
 function formatDatabowlRequest(body) {
   const lines = [];
   for (const [key, value] of new URLSearchParams(body)) {
@@ -320,10 +331,11 @@ function formatDatabowlRequest(body) {
 // dans l'admin (preprod en local, prod en production).
 async function pushToDatabowl(id, lead, page) {
   const cfg = db.getDatabowlPageSettings(page);
+  const integration = getDatabowlIntegration(getPageMeta(page).brand);
   const body = buildDatabowlPayload(lead, page, cfg).toString();
   const requestLog = formatDatabowlRequest(body);
 
-  if (!cfg.enabled || !cfg.campaign || !DATABOWL_CID || !DATABOWL_SID) {
+  if (!cfg.enabled || !cfg.campaign || !integration.cid || !integration.sid) {
     db.updateSubmissionDatabowl(
       id,
       "not_configured",
@@ -854,7 +866,8 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`Landings JPO + admin server running on http://127.0.0.1:${PORT}`);
   console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX) · /modele-chr (C-HR+) · /modele-yaris-cross (YARIS)`);
   console.log(`  Admin    : /admin/login`);
-  console.log(`  [databowl] cid=${DATABOWL_CID} sid=${DATABOWL_SID}`);
+  console.log(`  [databowl] Lexus cid=${DATABOWL_LEXUS_CID} sid=${DATABOWL_LEXUS_SID}`);
+  console.log(`  [databowl] Toyota cid=${DATABOWL_TOYOTA_CID} sid=${DATABOWL_TOYOTA_SID}`);
 
   const dbw = db.getDatabowlSettings();
 

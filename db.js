@@ -94,16 +94,23 @@ function setAnalyticsSettings({ enabled, measurement_id }) {
 
 // --------------------------------------------------------------------------
 // Databowl : code campagne BACS (champ f_859_campaignid) configurable par page.
-// Le cid/sid technique Databowl reste global (cote server.js) ; ce qui change
-// par page et par environnement, c'est le code campagne (preprod vs prod).
-// Priorite : valeur en base (admin) > variable d'environnement > vide.
+// Priorite : valeur en base (admin) > variable d'environnement > valeur par defaut.
 // --------------------------------------------------------------------------
 const DATABOWL_PAGES = ["LBX", "NX", "CHR", "YARIS"];
+const DEFAULT_DATABOWL_CAMPAIGNS = {
+  LBX: "701Sa00002elzpZ",
+  NX: "701Sa00002elGuO",
+  CHR: "701Sa00002enXXV",
+  YARIS: "701Sa00002enXXV"
+};
 
 function getDatabowlPageSettings(page) {
   const p = String(page).toUpperCase();
   const envCampaign =
-    process.env[`DATABOWL_${p}_CAMPAIGN`] || process.env.DATABOWL_CAMPAIGN_ID || "";
+    process.env[`DATABOWL_${p}_CAMPAIGN`] ||
+    process.env.DATABOWL_CAMPAIGN_ID ||
+    DEFAULT_DATABOWL_CAMPAIGNS[p] ||
+    "";
   const campaign = getSetting(`databowl_${p.toLowerCase()}_campaign`, envCampaign) || "";
   const enabledRaw = getSetting(
     `databowl_${p.toLowerCase()}_enabled`,

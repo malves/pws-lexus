@@ -42,31 +42,31 @@ sans jamais bloquer l'enregistrement en base.
 
 Deux niveaux d'identifiants :
 
-- **`cid` / `sid`** — identifiants techniques d'intégration Databowl, **communs aux deux pages**
-  (valeurs par défaut `628` / `2`, surchargeables via `DATABOWL_CID` / `DATABOWL_SID`).
-- **Code campagne BACS** (champ `f_859_campaignid`) — **propre à chaque page** (LBX / NX) et
+- **`cid` / `sid`** — identifiants techniques d'intégration Databowl, **propres à chaque marque**
+  (Lexus `628` / `1189`, Toyota `364` / `1189`).
+- **Code campagne BACS** (champ `f_859_campaignid`) — **propre à chaque page** et
   **différent entre préproduction et production**. C'est la valeur que l'on règle au quotidien.
 
 Le code campagne est **configurable par page** et **modifiable à chaud** depuis le back-office
-(bouton **« Databowl »** du dashboard). On saisit ainsi le code de **préproduction en local**
-et celui de **production en production**.
+(bouton **« Databowl »** du dashboard).
 
 Ordre de priorité du code campagne : valeur enregistrée dans l'admin > `DATABOWL_<PAGE>_CAMPAIGN`
-> `DATABOWL_CAMPAIGN_ID` (fallback global) > vide. Tant que le code est absent ou la page
+> `DATABOWL_CAMPAIGN_ID` (fallback global) > valeur par défaut du projet. Tant que la page est
 désactivée, les leads sont enregistrés en base mais **non** envoyés à Databowl (statut `not_configured`).
 
 ```bash
-# Exemple : codes de PREPROD en local
-DATABOWL_LBX_CAMPAIGN=701Aa00001RlRnv \
-DATABOWL_NX_CAMPAIGN=701Aa00001sbScR  npm start
+# Exemple : surcharger un code campagne
+DATABOWL_LBX_CAMPAIGN=701Sa00002elzpZ npm start
 ```
 
 Codes campagnes fournis par l'agence :
 
-| Page | Pré-prod | Prod |
-|------|----------|------|
-| LBX  | `701Aa00001RlRnv` | `701Sa00002elzpZ` |
-| NX   | `701Aa00001sbScR` | `701Sa00002elGuO` |
+| Page | Marque | Code |
+|------|--------|------|
+| LBX  | Lexus  | `701Sa00002elzpZ` |
+| NX   | Lexus  | `701Sa00002elGuO` |
+| CHR+ | Toyota | `701Sa00002enXXV` |
+| Yaris Cross | Toyota | `701Sa00002enXXV` |
 
 ## Back-office (`/admin`)
 
@@ -78,6 +78,7 @@ Codes campagnes fournis par l'agence :
 
 ## Variables d'environnement
 
-Voir `.env.example` : `PORT`, `DATABOWL_CID`, `DATABOWL_SID`,
+Voir `.env.example` : `PORT`, `DATABOWL_LEXUS_CID`, `DATABOWL_LEXUS_SID`,
+`DATABOWL_TOYOTA_CID`, `DATABOWL_TOYOTA_SID`,
 `DATABOWL_LBX_CAMPAIGN`, `DATABOWL_NX_CAMPAIGN`, `DATABOWL_CAMPAIGN_ID`,
 `ADMIN_USER`, `ADMIN_PASSWORD`, `SESSION_SECRET`, `DB_PATH`.
