@@ -13,11 +13,8 @@ const ROOT = __dirname;
 const DATABOWL_ENDPOINT = "https://neo.databowl.com/api/v1/lead";
 const POWERSPACE_ENDPOINT = "https://a.pwspace.com/ld";
 
-// Identifiants techniques d'integration Databowl par marque.
-const DATABOWL_LEXUS_CID = process.env.DATABOWL_LEXUS_CID || "628";
-const DATABOWL_LEXUS_SID = process.env.DATABOWL_LEXUS_SID || "1189";
-const DATABOWL_TOYOTA_CID = process.env.DATABOWL_TOYOTA_CID || "364";
-const DATABOWL_TOYOTA_SID = process.env.DATABOWL_TOYOTA_SID || "1189";
+// Les identifiants techniques Databowl (cid/sid) et le code campagne BACS sont
+// configures par page exclusivement depuis l'admin (cf. db.getDatabowlPageSettings).
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
 const SESSION_SECRET = process.env.SESSION_SECRET || "dev-secret-change-me";
@@ -275,10 +272,9 @@ function buildDatabowlPayload(lead, page, cfg) {
   const params = new URLSearchParams();
   const meta = getPageMeta(page);
   const offerCode = lead.offre || meta.offer;
-  const integration = getDatabowlIntegration(meta.brand);
 
-  params.set("cid", integration.cid);
-  params.set("sid", integration.sid);
+  params.set("cid", cfg.cid || "");
+  params.set("sid", cfg.sid || "");
   params.set("f_1_email", lead.email || "");
   params.set("f_2_title", lead.civilite || "");
   params.set("f_3_firstname", lead.prenom || "");
@@ -305,14 +301,6 @@ function buildDatabowlPayload(lead, page, cfg) {
   return params;
 }
 
-function getDatabowlIntegration(brand) {
-  if (String(brand).toLowerCase() === "toyota") {
-    return { cid: DATABOWL_TOYOTA_CID, sid: DATABOWL_TOYOTA_SID };
-  }
-
-  return { cid: DATABOWL_LEXUS_CID, sid: DATABOWL_LEXUS_SID };
-}
-
 function formatDatabowlRequest(body) {
   const lines = [];
   for (const [key, value] of new URLSearchParams(body)) {
@@ -331,11 +319,10 @@ function formatDatabowlRequest(body) {
 // dans l'admin (preprod en local, prod en production).
 async function pushToDatabowl(id, lead, page) {
   const cfg = db.getDatabowlPageSettings(page);
-  const integration = getDatabowlIntegration(getPageMeta(page).brand);
   const body = buildDatabowlPayload(lead, page, cfg).toString();
   const requestLog = formatDatabowlRequest(body);
 
-  if (!cfg.enabled || !cfg.campaign || !integration.cid || !integration.sid) {
+  if (!cfg.enabled || !cfg.campaign || !cfg.cid || !cfg.sid) {
     db.updateSubmissionDatabowl(
       id,
       "not_configured",
@@ -592,6 +579,8 @@ function handleAdminApi(req, res, url) {
           for (const page of db.DATABOWL_PAGES) {
             const raw = body[page] || {};
             const campaign = String(raw.campaign || "").trim();
+            const cid = String(raw.cid || "").trim();
+            const sid = String(raw.sid || "").trim();
             const enabled = !!raw.enabled;
 
             if (campaign && !/^[A-Za-z0-9._-]+$/.test(campaign)) {
@@ -601,14 +590,28 @@ function handleAdminApi(req, res, url) {
               });
             }
 
-            if (enabled && !campaign) {
+            if (cid && !/^\d+$/.test(cid)) {
               return sendJson(res, 400, {
                 ok: false,
-                message: `Databowl ${page} : le code campagne est requis pour activer l'envoi.`
+                message: `Databowl ${page} : cid invalide (chiffres uniquement).`
               });
             }
 
-            settings[page] = { enabled, campaign };
+            if (sid && !/^\d+$/.test(sid)) {
+              return sendJson(res, 400, {
+                ok: false,
+                message: `Databowl ${page} : sid invalide (chiffres uniquement).`
+              });
+            }
+
+            if (enabled && (!campaign || !cid || !sid)) {
+              return sendJson(res, 400, {
+                ok: false,
+                message: `Databowl ${page} : code campagne, cid et sid sont requis pour activer l'envoi.`
+              });
+            }
+
+            settings[page] = { enabled, campaign, cid, sid };
           }
 
           db.setDatabowlSettings(settings);
@@ -866,16 +869,14 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`Landings JPO + admin server running on http://127.0.0.1:${PORT}`);
   console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX) · /modele-chr (C-HR+) · /modele-yaris-cross (YARIS)`);
   console.log(`  Admin    : /admin/login`);
-  console.log(`  [databowl] Lexus cid=${DATABOWL_LEXUS_CID} sid=${DATABOWL_LEXUS_SID}`);
-  console.log(`  [databowl] Toyota cid=${DATABOWL_TOYOTA_CID} sid=${DATABOWL_TOYOTA_SID}`);
 
   const dbw = db.getDatabowlSettings();
 
   for (const page of db.DATABOWL_PAGES) {
     const cfg = dbw[page];
 
-    if (cfg.enabled && cfg.campaign) {
-      console.log(`  [databowl] ${page} actif : campagne=${cfg.campaign}`);
+    if (cfg.enabled && cfg.campaign && cfg.cid && cfg.sid) {
+      console.log(`  [databowl] ${page} actif : campagne=${cfg.campaign} cid=${cfg.cid} sid=${cfg.sid}`);
     } else {
       console.log(`  [databowl] ${page} non configure : leads enregistres en base mais non envoyes a Databowl.`);
     }

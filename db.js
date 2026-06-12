@@ -93,30 +93,30 @@ function setAnalyticsSettings({ enabled, measurement_id }) {
 }
 
 // --------------------------------------------------------------------------
-// Databowl : code campagne BACS (champ f_859_campaignid) configurable par page.
-// Priorite : valeur en base (admin) > variable d'environnement > valeur par defaut.
+// Databowl : configuration par page (code campagne BACS f_859_campaignid,
+// identifiants techniques cid/sid). Tout est configurable EXCLUSIVEMENT depuis
+// l'admin ; les valeurs par defaut ci-dessous servent uniquement de seed initial.
 // --------------------------------------------------------------------------
 const DATABOWL_PAGES = ["LBX", "NX", "CHR", "YARIS"];
-const DEFAULT_DATABOWL_CAMPAIGNS = {
-  LBX: "701Sa00002elzpZ",
-  NX: "701Sa00002elGuO",
-  CHR: "701Sa00002enXXV",
-  YARIS: "701Sa00002enXXV"
+const DEFAULT_DATABOWL_SETTINGS = {
+  LBX: { campaign: "701Sa00002elzpZ", cid: "628", sid: "1189" },
+  NX: { campaign: "701Sa00002elGuO", cid: "628", sid: "1189" },
+  CHR: { campaign: "701Sa00002enXXV", cid: "364", sid: "1189" },
+  YARIS: { campaign: "701Sa00002enXXV", cid: "364", sid: "1189" }
 };
 
 function getDatabowlPageSettings(page) {
   const p = String(page).toUpperCase();
-  const envCampaign =
-    process.env[`DATABOWL_${p}_CAMPAIGN`] ||
-    process.env.DATABOWL_CAMPAIGN_ID ||
-    DEFAULT_DATABOWL_CAMPAIGNS[p] ||
-    "";
-  const campaign = getSetting(`databowl_${p.toLowerCase()}_campaign`, envCampaign) || "";
+  const key = p.toLowerCase();
+  const defaults = DEFAULT_DATABOWL_SETTINGS[p] || { campaign: "", cid: "", sid: "" };
+  const campaign = getSetting(`databowl_${key}_campaign`, defaults.campaign) || "";
+  const cid = getSetting(`databowl_${key}_cid`, defaults.cid) || "";
+  const sid = getSetting(`databowl_${key}_sid`, defaults.sid) || "";
   const enabledRaw = getSetting(
-    `databowl_${p.toLowerCase()}_enabled`,
-    campaign ? "1" : "0"
+    `databowl_${key}_enabled`,
+    campaign && cid && sid ? "1" : "0"
   );
-  return { enabled: enabledRaw === "1", campaign };
+  return { enabled: enabledRaw === "1", campaign, cid, sid };
 }
 
 function getDatabowlSettings() {
@@ -132,6 +132,8 @@ function setDatabowlSettings(settings = {}) {
     const key = page.toLowerCase();
     setSetting(`databowl_${key}_enabled`, cfg.enabled ? "1" : "0");
     setSetting(`databowl_${key}_campaign`, cfg.campaign || "");
+    setSetting(`databowl_${key}_cid`, cfg.cid || "");
+    setSetting(`databowl_${key}_sid`, cfg.sid || "");
   }
   return getDatabowlSettings();
 }

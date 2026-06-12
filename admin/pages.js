@@ -261,6 +261,7 @@ function renderDashboard() {
     .modal {
       width: 100%; max-width: 480px; background: var(--panel); border: 1px solid var(--line);
       border-radius: 4px; padding: 26px;
+      max-height: calc(100vh - 48px); overflow-y: auto;
     }
     .modal h3 { margin: 0 0 18px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; font-size: 15px; }
     .modal .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -298,6 +299,7 @@ function renderDashboard() {
       color: var(--gold); margin-bottom: 12px;
     }
     .dbw-page-title .muted { letter-spacing: 0; text-transform: none; }
+    .dbw-page .grid { margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -443,12 +445,22 @@ function renderDashboard() {
   <div class="modal-bg" id="dbwModalBg">
     <div class="modal">
       <h3>Databowl</h3>
-      <p class="hint">Code campagne BACS propre à chaque page. Saisir le code de <strong>préproduction</strong> en local et celui de <strong>production</strong> en production. Les leads valides ne sont envoyés que si la page est activée.</p>
+      <p class="hint">Configuration propre à chaque page : code campagne BACS (champ <code>f_859_campaignid</code>) et identifiants techniques <strong>cid</strong> / <strong>sid</strong>. Les leads valides ne sont envoyés que si la page est activée (campagne, cid et sid renseignés).</p>
       <div class="dbw-page">
         <div class="dbw-page-title">Page LBX <span class="muted">· /modele-lbx</span></div>
         <div class="row full">
           <label for="dbwLbxCampaign">Code campagne BACS</label>
           <input id="dbwLbxCampaign" type="text" placeholder="701Aa00001RlRnv" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="grid">
+          <div class="row">
+            <label for="dbwLbxCid">cid</label>
+            <input id="dbwLbxCid" type="text" inputmode="numeric" placeholder="628" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="row">
+            <label for="dbwLbxSid">sid</label>
+            <input id="dbwLbxSid" type="text" inputmode="numeric" placeholder="1189" autocomplete="off" spellcheck="false">
+          </div>
         </div>
         <div class="toggle">
           <input id="dbwLbxEnabled" type="checkbox">
@@ -461,6 +473,16 @@ function renderDashboard() {
           <label for="dbwNxCampaign">Code campagne BACS</label>
           <input id="dbwNxCampaign" type="text" placeholder="701Aa00001sbScR" autocomplete="off" spellcheck="false">
         </div>
+        <div class="grid">
+          <div class="row">
+            <label for="dbwNxCid">cid</label>
+            <input id="dbwNxCid" type="text" inputmode="numeric" placeholder="628" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="row">
+            <label for="dbwNxSid">sid</label>
+            <input id="dbwNxSid" type="text" inputmode="numeric" placeholder="1189" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
         <div class="toggle">
           <input id="dbwNxEnabled" type="checkbox">
           <label for="dbwNxEnabled">Activer l'envoi des leads NX</label>
@@ -472,6 +494,16 @@ function renderDashboard() {
           <label for="dbwChrCampaign">Code campagne BACS</label>
           <input id="dbwChrCampaign" type="text" placeholder="701Aa00001xxxx" autocomplete="off" spellcheck="false">
         </div>
+        <div class="grid">
+          <div class="row">
+            <label for="dbwChrCid">cid</label>
+            <input id="dbwChrCid" type="text" inputmode="numeric" placeholder="364" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="row">
+            <label for="dbwChrSid">sid</label>
+            <input id="dbwChrSid" type="text" inputmode="numeric" placeholder="1189" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
         <div class="toggle">
           <input id="dbwChrEnabled" type="checkbox">
           <label for="dbwChrEnabled">Activer l'envoi des leads C-HR+</label>
@@ -482,6 +514,16 @@ function renderDashboard() {
         <div class="row full">
           <label for="dbwYarisCampaign">Code campagne BACS</label>
           <input id="dbwYarisCampaign" type="text" placeholder="701Aa00001xxxx" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="grid">
+          <div class="row">
+            <label for="dbwYarisCid">cid</label>
+            <input id="dbwYarisCid" type="text" inputmode="numeric" placeholder="364" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="row">
+            <label for="dbwYarisSid">sid</label>
+            <input id="dbwYarisSid" type="text" inputmode="numeric" placeholder="1189" autocomplete="off" spellcheck="false">
+          </div>
         </div>
         <div class="toggle">
           <input id="dbwYarisEnabled" type="checkbox">
@@ -520,12 +562,20 @@ function renderDashboard() {
       dbwOpenBtn: document.getElementById("dbwOpenBtn"),
       dbwModalBg: document.getElementById("dbwModalBg"),
       dbwLbxCampaign: document.getElementById("dbwLbxCampaign"),
+      dbwLbxCid: document.getElementById("dbwLbxCid"),
+      dbwLbxSid: document.getElementById("dbwLbxSid"),
       dbwLbxEnabled: document.getElementById("dbwLbxEnabled"),
       dbwNxCampaign: document.getElementById("dbwNxCampaign"),
+      dbwNxCid: document.getElementById("dbwNxCid"),
+      dbwNxSid: document.getElementById("dbwNxSid"),
       dbwNxEnabled: document.getElementById("dbwNxEnabled"),
       dbwChrCampaign: document.getElementById("dbwChrCampaign"),
+      dbwChrCid: document.getElementById("dbwChrCid"),
+      dbwChrSid: document.getElementById("dbwChrSid"),
       dbwChrEnabled: document.getElementById("dbwChrEnabled"),
       dbwYarisCampaign: document.getElementById("dbwYarisCampaign"),
+      dbwYarisCid: document.getElementById("dbwYarisCid"),
+      dbwYarisSid: document.getElementById("dbwYarisSid"),
       dbwYarisEnabled: document.getElementById("dbwYarisEnabled"),
       dbwSave: document.getElementById("dbwSave"),
       dbwCancel: document.getElementById("dbwCancel"),
@@ -656,12 +706,20 @@ function renderDashboard() {
       const s = await (await fetch("/api/admin/settings/databowl")).json();
       const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, yaris = s.YARIS || {};
       els.dbwLbxCampaign.value = lbx.campaign || "";
+      els.dbwLbxCid.value = lbx.cid || "";
+      els.dbwLbxSid.value = lbx.sid || "";
       els.dbwLbxEnabled.checked = !!lbx.enabled;
       els.dbwNxCampaign.value = nx.campaign || "";
+      els.dbwNxCid.value = nx.cid || "";
+      els.dbwNxSid.value = nx.sid || "";
       els.dbwNxEnabled.checked = !!nx.enabled;
       els.dbwChrCampaign.value = chr.campaign || "";
+      els.dbwChrCid.value = chr.cid || "";
+      els.dbwChrSid.value = chr.sid || "";
       els.dbwChrEnabled.checked = !!chr.enabled;
       els.dbwYarisCampaign.value = yaris.campaign || "";
+      els.dbwYarisCid.value = yaris.cid || "";
+      els.dbwYarisSid.value = yaris.sid || "";
       els.dbwYarisEnabled.checked = !!yaris.enabled;
       const active = dbwActiveCount(s);
       els.dbwOpenBtn.textContent = active ? "Databowl · " + active + "/4 actif" : "Databowl";
@@ -689,18 +747,26 @@ function renderDashboard() {
       const body = {
         LBX: {
           campaign: els.dbwLbxCampaign.value.trim(),
+          cid: els.dbwLbxCid.value.trim(),
+          sid: els.dbwLbxSid.value.trim(),
           enabled: els.dbwLbxEnabled.checked
         },
         NX: {
           campaign: els.dbwNxCampaign.value.trim(),
+          cid: els.dbwNxCid.value.trim(),
+          sid: els.dbwNxSid.value.trim(),
           enabled: els.dbwNxEnabled.checked
         },
         CHR: {
           campaign: els.dbwChrCampaign.value.trim(),
+          cid: els.dbwChrCid.value.trim(),
+          sid: els.dbwChrSid.value.trim(),
           enabled: els.dbwChrEnabled.checked
         },
         YARIS: {
           campaign: els.dbwYarisCampaign.value.trim(),
+          cid: els.dbwYarisCid.value.trim(),
+          sid: els.dbwYarisSid.value.trim(),
           enabled: els.dbwYarisEnabled.checked
         }
       };

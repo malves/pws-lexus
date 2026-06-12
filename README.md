@@ -40,33 +40,25 @@ npm start
 Les leads valides (statut `success`) sont poussés vers Databowl **uniquement en cas de succès**,
 sans jamais bloquer l'enregistrement en base.
 
-Deux niveaux d'identifiants :
+Toute la configuration Databowl se fait **exclusivement depuis le back-office**
+(bouton **« Databowl »** du dashboard), **par page** et **modifiable à chaud**. Aucune variable
+d'environnement Databowl n'est utilisée. Pour chaque page on règle :
 
-- **`cid` / `sid`** — identifiants techniques d'intégration Databowl, **propres à chaque marque**
-  (Lexus `628` / `1189`, Toyota `364` / `1189`).
-- **Code campagne BACS** (champ `f_859_campaignid`) — **propre à chaque page** et
-  **différent entre préproduction et production**. C'est la valeur que l'on règle au quotidien.
+- **Code campagne BACS** (champ `f_859_campaignid`) — propre à chaque page et différent
+  entre préproduction et production.
+- **`cid` / `sid`** — identifiants techniques d'intégration Databowl, propres à chaque page.
 
-Le code campagne est **configurable par page** et **modifiable à chaud** depuis le back-office
-(bouton **« Databowl »** du dashboard).
+Tant que la page est désactivée (ou si campagne / `cid` / `sid` manquent), les leads sont
+enregistrés en base mais **non** envoyés à Databowl (statut `not_configured`).
 
-Ordre de priorité du code campagne : valeur enregistrée dans l'admin > `DATABOWL_<PAGE>_CAMPAIGN`
-> `DATABOWL_CAMPAIGN_ID` (fallback global) > valeur par défaut du projet. Tant que la page est
-désactivée, les leads sont enregistrés en base mais **non** envoyés à Databowl (statut `not_configured`).
+Valeurs par défaut (seed initial, surchargé dès qu'on enregistre dans l'admin) :
 
-```bash
-# Exemple : surcharger un code campagne
-DATABOWL_LBX_CAMPAIGN=701Sa00002elzpZ npm start
-```
-
-Codes campagnes fournis par l'agence :
-
-| Page | Marque | Code |
-|------|--------|------|
-| LBX  | Lexus  | `701Sa00002elzpZ` |
-| NX   | Lexus  | `701Sa00002elGuO` |
-| CHR+ | Toyota | `701Sa00002enXXV` |
-| Yaris Cross | Toyota | `701Sa00002enXXV` |
+| Page | Marque | Code campagne | cid | sid |
+|------|--------|---------------|-----|-----|
+| LBX  | Lexus  | `701Sa00002elzpZ` | `628` | `1189` |
+| NX   | Lexus  | `701Sa00002elGuO` | `628` | `1189` |
+| CHR+ | Toyota | `701Sa00002enXXV` | `364` | `1189` |
+| Yaris Cross | Toyota | `701Sa00002enXXV` | `364` | `1189` |
 
 ## Back-office (`/admin`)
 
@@ -78,7 +70,6 @@ Codes campagnes fournis par l'agence :
 
 ## Variables d'environnement
 
-Voir `.env.example` : `PORT`, `DATABOWL_LEXUS_CID`, `DATABOWL_LEXUS_SID`,
-`DATABOWL_TOYOTA_CID`, `DATABOWL_TOYOTA_SID`,
-`DATABOWL_LBX_CAMPAIGN`, `DATABOWL_NX_CAMPAIGN`, `DATABOWL_CAMPAIGN_ID`,
-`ADMIN_USER`, `ADMIN_PASSWORD`, `SESSION_SECRET`, `DB_PATH`.
+Voir `.env.example` : `PORT`, `ADMIN_USER`, `ADMIN_PASSWORD`, `SESSION_SECRET`, `DB_PATH`.
+La configuration Databowl (code campagne, `cid`, `sid` par page) n'est **pas** dans `.env` :
+elle se gère uniquement depuis l'admin.
