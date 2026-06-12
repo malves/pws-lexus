@@ -50,6 +50,9 @@ d'environnement Databowl n'est utilisée. Pour chaque page on règle :
 - **Code campagne BACS** (champ `f_859_campaignid`) — propre à chaque page et différent
   entre préproduction et production.
 - **`cid` / `sid`** — identifiants techniques d'intégration Databowl, propres à chaque page.
+- **Paramètres personnalisés** — paires *nom de variable* + *valeur* ajoutées dynamiquement
+  par page. Ils sont injectés dans le payload Databowl (et peuvent surcharger les champs par
+  défaut s'ils portent le même nom). Le nom n'accepte que lettres, chiffres et `. _ -`.
 
 Tant que la page est désactivée (ou si campagne / `cid` / `sid` manquent), les leads sont
 enregistrés en base mais **non** envoyés à Databowl (statut `not_configured`).
