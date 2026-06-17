@@ -1,6 +1,6 @@
 services:
   pws-lexus:
-    image: kleekr/jpo-lexus:1.5
+    image: kleekr/jpo-lexus:1.6
     container_name: pws-lexus
     restart: unless-stopped
     env_file:

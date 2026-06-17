@@ -338,7 +338,7 @@ function renderDashboard() {
     <div class="filters">
       <div class="f">
         <label>Page</label>
-        <select id="fPage"><option value="">Toutes</option><option value="LBX">LBX</option><option value="NX">NX</option><option value="CHR">C-HR+</option><option value="CHR_V2">C-HR+ V2</option><option value="YARIS">YARIS</option></select>
+        <select id="fPage"><option value="">Toutes</option><option value="LBX">LBX</option><option value="NX">NX</option><option value="CHR">C-HR+</option><option value="CHR_PLUS">C-HR+ (LP scroll)</option><option value="YARIS">YARIS</option></select>
       </div>
       <div class="f">
         <label>Statut</label>
@@ -541,24 +541,29 @@ function renderDashboard() {
         </div>
       </div>
       <div class="dbw-page">
-        <div class="dbw-page-title">Page C-HR+ V2 <span class="muted">· /modele-chr-plus</span></div>
+        <div class="dbw-page-title">Page C-HR+ LP scroll <span class="muted">· /modele-chr-plus</span></div>
         <div class="row full">
-          <label for="dbwChrV2Campaign">Code campagne BACS</label>
-          <input id="dbwChrV2Campaign" type="text" placeholder="701Aa00001xxxx" autocomplete="off" spellcheck="false">
+          <label for="dbwChrPlusCampaign">Code campagne BACS</label>
+          <input id="dbwChrPlusCampaign" type="text" placeholder="701Aa00001xxxx" autocomplete="off" spellcheck="false">
         </div>
         <div class="grid">
           <div class="row">
-            <label for="dbwChrV2Cid">cid</label>
-            <input id="dbwChrV2Cid" type="text" inputmode="numeric" placeholder="364" autocomplete="off" spellcheck="false">
+            <label for="dbwChrPlusCid">cid</label>
+            <input id="dbwChrPlusCid" type="text" inputmode="numeric" placeholder="364" autocomplete="off" spellcheck="false">
           </div>
           <div class="row">
-            <label for="dbwChrV2Sid">sid</label>
-            <input id="dbwChrV2Sid" type="text" inputmode="numeric" placeholder="1189" autocomplete="off" spellcheck="false">
+            <label for="dbwChrPlusSid">sid</label>
+            <input id="dbwChrPlusSid" type="text" inputmode="numeric" placeholder="1189" autocomplete="off" spellcheck="false">
           </div>
         </div>
         <div class="toggle">
-          <input id="dbwChrV2Enabled" type="checkbox">
-          <label for="dbwChrV2Enabled">Activer l'envoi des leads C-HR+ V2</label>
+          <input id="dbwChrPlusEnabled" type="checkbox">
+          <label for="dbwChrPlusEnabled">Activer l'envoi des leads C-HR+ LP</label>
+        </div>
+        <div class="dbw-params">
+          <div class="dbw-params-title">Paramètres personnalisés</div>
+          <div class="dbw-params-list" id="dbwChrPlusParams"></div>
+          <button type="button" class="btn sm dbw-params-add" data-dbw-add="CHR_PLUS">+ Ajouter un paramètre</button>
         </div>
       </div>
       <div class="dbw-page">
@@ -630,10 +635,10 @@ function renderDashboard() {
       dbwChrCid: document.getElementById("dbwChrCid"),
       dbwChrSid: document.getElementById("dbwChrSid"),
       dbwChrEnabled: document.getElementById("dbwChrEnabled"),
-      dbwChrV2Campaign: document.getElementById("dbwChrV2Campaign"),
-      dbwChrV2Cid: document.getElementById("dbwChrV2Cid"),
-      dbwChrV2Sid: document.getElementById("dbwChrV2Sid"),
-      dbwChrV2Enabled: document.getElementById("dbwChrV2Enabled"),
+      dbwChrPlusCampaign: document.getElementById("dbwChrPlusCampaign"),
+      dbwChrPlusCid: document.getElementById("dbwChrPlusCid"),
+      dbwChrPlusSid: document.getElementById("dbwChrPlusSid"),
+      dbwChrPlusEnabled: document.getElementById("dbwChrPlusEnabled"),
       dbwYarisCampaign: document.getElementById("dbwYarisCampaign"),
       dbwYarisCid: document.getElementById("dbwYarisCid"),
       dbwYarisSid: document.getElementById("dbwYarisSid"),
@@ -641,6 +646,7 @@ function renderDashboard() {
       dbwLbxParams: document.getElementById("dbwLbxParams"),
       dbwNxParams: document.getElementById("dbwNxParams"),
       dbwChrParams: document.getElementById("dbwChrParams"),
+      dbwChrPlusParams: document.getElementById("dbwChrPlusParams"),
       dbwYarisParams: document.getElementById("dbwYarisParams"),
       dbwModal: document.getElementById("dbwModalBg"),
       dbwSave: document.getElementById("dbwSave"),
@@ -761,7 +767,7 @@ function renderDashboard() {
 
     function dbwActiveCount(s) {
       let n = 0;
-      ["LBX", "NX", "CHR", "CHR_V2", "YARIS"].forEach((p) => {
+      ["LBX", "NX", "CHR", "CHR_PLUS", "YARIS"].forEach((p) => {
         const c = s[p] || {};
         if (c.enabled && c.campaign) n++;
       });
@@ -772,6 +778,7 @@ function renderDashboard() {
       LBX: function () { return els.dbwLbxParams; },
       NX: function () { return els.dbwNxParams; },
       CHR: function () { return els.dbwChrParams; },
+      CHR_PLUS: function () { return els.dbwChrPlusParams; },
       YARIS: function () { return els.dbwYarisParams; }
     };
 
@@ -851,7 +858,7 @@ function renderDashboard() {
 
     async function loadDbwSettings() {
       const s = await (await fetch("/api/admin/settings/databowl")).json();
-      const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, chrV2 = s.CHR_V2 || {}, yaris = s.YARIS || {};
+      const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, chrPlus = s.CHR_PLUS || {}, yaris = s.YARIS || {};
       els.dbwLbxCampaign.value = lbx.campaign || "";
       els.dbwLbxCid.value = lbx.cid || "";
       els.dbwLbxSid.value = lbx.sid || "";
@@ -867,10 +874,11 @@ function renderDashboard() {
       els.dbwChrSid.value = chr.sid || "";
       els.dbwChrEnabled.checked = !!chr.enabled;
       renderDbwParams(els.dbwChrParams, chr.params);
-      els.dbwChrV2Campaign.value = chrV2.campaign || "";
-      els.dbwChrV2Cid.value = chrV2.cid || "";
-      els.dbwChrV2Sid.value = chrV2.sid || "";
-      els.dbwChrV2Enabled.checked = !!chrV2.enabled;
+      els.dbwChrPlusCampaign.value = chrPlus.campaign || "";
+      els.dbwChrPlusCid.value = chrPlus.cid || "";
+      els.dbwChrPlusSid.value = chrPlus.sid || "";
+      els.dbwChrPlusEnabled.checked = !!chrPlus.enabled;
+      renderDbwParams(els.dbwChrPlusParams, chrPlus.params);
       els.dbwYarisCampaign.value = yaris.campaign || "";
       els.dbwYarisCid.value = yaris.cid || "";
       els.dbwYarisSid.value = yaris.sid || "";
@@ -921,11 +929,12 @@ function renderDashboard() {
           enabled: els.dbwChrEnabled.checked,
           params: collectDbwParams(els.dbwChrParams)
         },
-        CHR_V2: {
-          campaign: els.dbwChrV2Campaign.value.trim(),
-          cid: els.dbwChrV2Cid.value.trim(),
-          sid: els.dbwChrV2Sid.value.trim(),
-          enabled: els.dbwChrV2Enabled.checked
+        CHR_PLUS: {
+          campaign: els.dbwChrPlusCampaign.value.trim(),
+          cid: els.dbwChrPlusCid.value.trim(),
+          sid: els.dbwChrPlusSid.value.trim(),
+          enabled: els.dbwChrPlusEnabled.checked,
+          params: collectDbwParams(els.dbwChrPlusParams)
         },
         YARIS: {
           campaign: els.dbwYarisCampaign.value.trim(),
@@ -963,7 +972,7 @@ function renderDashboard() {
         ["Taux de succès", s.success_rate + "<small>%</small>", ""],
         ["Échecs serveur", s.server_validation_failed, "bad"],
         ["Échecs navigateur", s.client_validation_failed, "bad"],
-        ["LBX / NX / C-HR+ / C-HR+ V2 / YARIS", (s.by_page.LBX || 0) + " <small>/</small> " + (s.by_page.NX || 0) + " <small>/</small> " + (s.by_page.CHR || 0) + " <small>/</small> " + (s.by_page.CHR_V2 || 0) + " <small>/</small> " + (s.by_page.YARIS || 0), ""]
+        ["LBX / NX / C-HR+ / C-HR+ LP / YARIS", (s.by_page.LBX || 0) + " <small>/</small> " + (s.by_page.NX || 0) + " <small>/</small> " + (s.by_page.CHR || 0) + " <small>/</small> " + (s.by_page.CHR_PLUS || 0) + " <small>/</small> " + (s.by_page.YARIS || 0), ""]
       ].map(([k, v, cls]) =>
         '<div class="stat ' + cls + '"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'
       ).join("");

@@ -28,7 +28,6 @@ const LANDING_ROUTES = {
   "/modele-nx": "nx.html",
   "/modele-chr": "chr.html",
   "/modele-chr-plus": "chr-plus.html",
-  "/modele-chr-plus-v2": "chr-plus.html",
   "/modele-yaris-cross": "yaris-cross.html"
 };
 
@@ -208,22 +207,19 @@ const ZIPCODE_RE = /^\d{5}$/;
 
 function detectPage(lead) {
   const explicitPage = String(lead.page || "").toUpperCase();
-  if (explicitPage && ["LBX", "NX", "CHR", "CHR_V2", "YARIS"].includes(explicitPage)) {
+  if (explicitPage && ["LBX", "NX", "CHR", "CHR_PLUS", "YARIS"].includes(explicitPage)) {
     return explicitPage;
   }
   const fromUrl = String(lead.page_url || "").toLowerCase();
   if (fromUrl.includes("modele-yaris-cross") || fromUrl.includes("yaris-cross.html")) return "YARIS";
-  if (
-    fromUrl.includes("modele-chr-plus") ||
-    fromUrl.includes("modele-chr-plus-v2") ||
-    fromUrl.includes("chr-plus.html") ||
-    fromUrl.includes("chr-plus-v2.html")
-  ) return "CHR_V2";
+  if (fromUrl.includes("modele-chr-plus") || fromUrl.includes("chr-plus.html")) return "CHR_PLUS";
   if (fromUrl.includes("modele-chr") || fromUrl.includes("chr.html")) return "CHR";
   if (fromUrl.includes("modele-nx") || fromUrl.includes("nx.html")) return "NX";
   if (fromUrl.includes("modele-lbx") || fromUrl.includes("index.html")) return "LBX";
   const model = String(lead.modele || "").toLowerCase();
+  const offer = String(lead.offre || "").toLowerCase();
   if (model.includes("yaris cross") || model.includes("yaris-cross")) return "YARIS";
+  if (offer.includes("chr_plus")) return "CHR_PLUS";
   if (model.includes("c-hr+") || model.includes("c-hr") || model.includes("chr")) return "CHR";
   return model.includes("nx") ? "NX" : "LBX";
 }
@@ -242,11 +238,11 @@ function getPageMeta(page) {
       offer: "CHR_PART_JUIN_2026",
       landing: "Toyota C-HR+"
     },
-    CHR_V2: {
+    CHR_PLUS: {
       brand: "Toyota",
       model: "Toyota C-HR+",
-      offer: "CHR_PART_JUIN_2026",
-      landing: "Toyota C-HR+ V2"
+      offer: "CHR_PLUS_PART_JUIN_2026",
+      landing: "Toyota C-HR+ (Landing scroll)"
     },
     NX: {
       brand: "Lexus",
@@ -289,7 +285,6 @@ function validateLead(lead) {
 function buildDatabowlPayload(lead, page, cfg) {
   const params = new URLSearchParams();
   const meta = getPageMeta(page);
-  const offerCode = lead.offre || meta.offer;
 
   params.set("cid", cfg.cid || "");
   params.set("sid", cfg.sid || "");
@@ -304,26 +299,18 @@ function buildDatabowlPayload(lead, page, cfg) {
   // params.set("f_761_wishedmodel", meta.model);
   params.set("f_760_wishedbrand", meta.brand);
   params.set("f_769_wishedfinancingtype", "LLD");
-  params.set(
-    "f_762_comments",
-    [
-      `Landing ${meta.landing} JPO`,
-      `Offre: ${offerCode}`,
-      lead.concession ? `Code postal: ${lead.concession}` : "",
-      `RGPD: ${lead.rgpd ? "true" : "false"}`,
-      `URL: ${lead.page_url || ""}`
-    ]
-      .filter(Boolean)
-      .join(" | ")
-  );
 
   // Paramètres personnalisés configurés par page dans l'admin. Ils sont
   // appliqués en dernier afin de pouvoir surcharger les valeurs par défaut.
   if (Array.isArray(cfg.params)) {
     for (const { name, value } of cfg.params) {
-      if (name) params.set(name, value != null ? value : "");
+      if (name && name !== "f_762_comments") {
+        params.set(name, value != null ? value : "");
+      }
     }
   }
+
+  params.delete("f_762_comments");
 
   return params;
 }
