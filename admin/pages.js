@@ -338,7 +338,7 @@ function renderDashboard() {
     <div class="filters">
       <div class="f">
         <label>Page</label>
-        <select id="fPage"><option value="">Toutes</option><option value="LBX">LBX</option><option value="NX">NX</option><option value="CHR">C-HR+</option><option value="CHR_PLUS">C-HR+ (LP scroll)</option><option value="YARIS">YARIS</option></select>
+        <select id="fPage"><option value="">Toutes</option><option value="LBX">LBX</option><option value="NX">NX</option><option value="CHR">C-HR+</option><option value="CHR_PLUS">C-HR+ (LP scroll)</option><option value="CHR_VIDEO">C-HR+ (Vidéo)</option><option value="YARIS">YARIS</option></select>
       </div>
       <div class="f">
         <label>Statut</label>
@@ -567,6 +567,32 @@ function renderDashboard() {
         </div>
       </div>
       <div class="dbw-page">
+        <div class="dbw-page-title">Page C-HR+ Vidéo <span class="muted">· /modele-chr-video</span></div>
+        <div class="row full">
+          <label for="dbwChrVideoCampaign">Code campagne BACS</label>
+          <input id="dbwChrVideoCampaign" type="text" placeholder="701Aa00001xxxx" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="grid">
+          <div class="row">
+            <label for="dbwChrVideoCid">cid</label>
+            <input id="dbwChrVideoCid" type="text" inputmode="numeric" placeholder="364" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="row">
+            <label for="dbwChrVideoSid">sid</label>
+            <input id="dbwChrVideoSid" type="text" inputmode="numeric" placeholder="1189" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <div class="toggle">
+          <input id="dbwChrVideoEnabled" type="checkbox">
+          <label for="dbwChrVideoEnabled">Activer l'envoi des leads C-HR+ Vidéo</label>
+        </div>
+        <div class="dbw-params">
+          <div class="dbw-params-title">Paramètres personnalisés</div>
+          <div class="dbw-params-list" id="dbwChrVideoParams"></div>
+          <button type="button" class="btn sm dbw-params-add" data-dbw-add="CHR_VIDEO">+ Ajouter un paramètre</button>
+        </div>
+      </div>
+      <div class="dbw-page">
         <div class="dbw-page-title">Page YARIS <span class="muted">· /modele-yaris-cross</span></div>
         <div class="row full">
           <label for="dbwYarisCampaign">Code campagne BACS</label>
@@ -639,6 +665,10 @@ function renderDashboard() {
       dbwChrPlusCid: document.getElementById("dbwChrPlusCid"),
       dbwChrPlusSid: document.getElementById("dbwChrPlusSid"),
       dbwChrPlusEnabled: document.getElementById("dbwChrPlusEnabled"),
+      dbwChrVideoCampaign: document.getElementById("dbwChrVideoCampaign"),
+      dbwChrVideoCid: document.getElementById("dbwChrVideoCid"),
+      dbwChrVideoSid: document.getElementById("dbwChrVideoSid"),
+      dbwChrVideoEnabled: document.getElementById("dbwChrVideoEnabled"),
       dbwYarisCampaign: document.getElementById("dbwYarisCampaign"),
       dbwYarisCid: document.getElementById("dbwYarisCid"),
       dbwYarisSid: document.getElementById("dbwYarisSid"),
@@ -647,6 +677,7 @@ function renderDashboard() {
       dbwNxParams: document.getElementById("dbwNxParams"),
       dbwChrParams: document.getElementById("dbwChrParams"),
       dbwChrPlusParams: document.getElementById("dbwChrPlusParams"),
+      dbwChrVideoParams: document.getElementById("dbwChrVideoParams"),
       dbwYarisParams: document.getElementById("dbwYarisParams"),
       dbwModal: document.getElementById("dbwModalBg"),
       dbwSave: document.getElementById("dbwSave"),
@@ -767,7 +798,7 @@ function renderDashboard() {
 
     function dbwActiveCount(s) {
       let n = 0;
-      ["LBX", "NX", "CHR", "CHR_PLUS", "YARIS"].forEach((p) => {
+      ["LBX", "NX", "CHR", "CHR_PLUS", "CHR_VIDEO", "YARIS"].forEach((p) => {
         const c = s[p] || {};
         if (c.enabled && c.campaign) n++;
       });
@@ -779,6 +810,7 @@ function renderDashboard() {
       NX: function () { return els.dbwNxParams; },
       CHR: function () { return els.dbwChrParams; },
       CHR_PLUS: function () { return els.dbwChrPlusParams; },
+      CHR_VIDEO: function () { return els.dbwChrVideoParams; },
       YARIS: function () { return els.dbwYarisParams; }
     };
 
@@ -858,7 +890,7 @@ function renderDashboard() {
 
     async function loadDbwSettings() {
       const s = await (await fetch("/api/admin/settings/databowl")).json();
-      const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, chrPlus = s.CHR_PLUS || {}, yaris = s.YARIS || {};
+      const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, chrPlus = s.CHR_PLUS || {}, chrVideo = s.CHR_VIDEO || {}, yaris = s.YARIS || {};
       els.dbwLbxCampaign.value = lbx.campaign || "";
       els.dbwLbxCid.value = lbx.cid || "";
       els.dbwLbxSid.value = lbx.sid || "";
@@ -879,6 +911,11 @@ function renderDashboard() {
       els.dbwChrPlusSid.value = chrPlus.sid || "";
       els.dbwChrPlusEnabled.checked = !!chrPlus.enabled;
       renderDbwParams(els.dbwChrPlusParams, chrPlus.params);
+      els.dbwChrVideoCampaign.value = chrVideo.campaign || "";
+      els.dbwChrVideoCid.value = chrVideo.cid || "";
+      els.dbwChrVideoSid.value = chrVideo.sid || "";
+      els.dbwChrVideoEnabled.checked = !!chrVideo.enabled;
+      renderDbwParams(els.dbwChrVideoParams, chrVideo.params);
       els.dbwYarisCampaign.value = yaris.campaign || "";
       els.dbwYarisCid.value = yaris.cid || "";
       els.dbwYarisSid.value = yaris.sid || "";
@@ -936,6 +973,13 @@ function renderDashboard() {
           enabled: els.dbwChrPlusEnabled.checked,
           params: collectDbwParams(els.dbwChrPlusParams)
         },
+        CHR_VIDEO: {
+          campaign: els.dbwChrVideoCampaign.value.trim(),
+          cid: els.dbwChrVideoCid.value.trim(),
+          sid: els.dbwChrVideoSid.value.trim(),
+          enabled: els.dbwChrVideoEnabled.checked,
+          params: collectDbwParams(els.dbwChrVideoParams)
+        },
         YARIS: {
           campaign: els.dbwYarisCampaign.value.trim(),
           cid: els.dbwYarisCid.value.trim(),
@@ -972,7 +1016,7 @@ function renderDashboard() {
         ["Taux de succès", s.success_rate + "<small>%</small>", ""],
         ["Échecs serveur", s.server_validation_failed, "bad"],
         ["Échecs navigateur", s.client_validation_failed, "bad"],
-        ["LBX / NX / C-HR+ / C-HR+ LP / YARIS", (s.by_page.LBX || 0) + " <small>/</small> " + (s.by_page.NX || 0) + " <small>/</small> " + (s.by_page.CHR || 0) + " <small>/</small> " + (s.by_page.CHR_PLUS || 0) + " <small>/</small> " + (s.by_page.YARIS || 0), ""]
+        ["LBX / NX / C-HR+ / C-HR+ LP / C-HR+ Vidéo / YARIS", (s.by_page.LBX || 0) + " <small>/</small> " + (s.by_page.NX || 0) + " <small>/</small> " + (s.by_page.CHR || 0) + " <small>/</small> " + (s.by_page.CHR_PLUS || 0) + " <small>/</small> " + (s.by_page.CHR_VIDEO || 0) + " <small>/</small> " + (s.by_page.YARIS || 0), ""]
       ].map(([k, v, cls]) =>
         '<div class="stat ' + cls + '"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'
       ).join("");

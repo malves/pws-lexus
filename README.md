@@ -23,7 +23,8 @@ npm start
 - LBX : http://127.0.0.1:8010/modele-lbx
 - NX  : http://127.0.0.1:8010/modele-nx
 - CHR : http://127.0.0.1:8010/modele-chr
-- CHR V2 : http://127.0.0.1:8010/modele-chr-plus
+- CHR LP scroll : http://127.0.0.1:8010/modele-chr-plus
+- CHR Vidéo : http://127.0.0.1:8010/modele-chr-video
 - YARIS : http://127.0.0.1:8010/modele-yaris-cross
 - Admin : http://127.0.0.1:8010/admin/login
 
@@ -64,13 +65,15 @@ Valeurs par défaut (seed initial, surchargé dès qu'on enregistre dans l'admin
 | LBX  | Lexus  | `701Sa00002elzpZ` | `628` | `1189` |
 | NX   | Lexus  | `701Sa00002elGuO` | `628` | `1189` |
 | CHR+ | Toyota | `701Sa00002enXXV` | `364` | `1189` |
-| CHR+ V2 | Toyota | `701Sa00002enXXV` | `364` | `1189` |
+| CHR+ LP scroll | Toyota | `701Sa00002enXXV` | `364` | `1189` |
+| CHR+ Vidéo | Toyota | `701Sa00002enXXV` | `364` | `1189` |
 | Yaris Cross | Toyota | `701Sa00002enXXV` | `364` | `1189` |
 
-La page `CHR+ V2` est une variante A/B dédiée : elle conserve le même tunnel de lead,
-la même intégration Databowl par défaut et les mêmes métadonnées métier que `CHR`,
-mais elle dispose de sa propre route et de sa propre clé de page en back-office
-(`CHR_V2`) pour comparer les performances sans écraser l'existant.
+Les pages `CHR+ LP scroll` (`CHR_PLUS`, route `/modele-chr-plus`) et `CHR+ Vidéo`
+(`CHR_VIDEO`, route `/modele-chr-video`) sont deux variantes A/B dédiées de la landing
+C-HR+ : elles conservent le même tunnel de lead, la même intégration Databowl par défaut
+et les mêmes métadonnées métier que `CHR`, mais chacune dispose de sa propre route et de
+sa propre clé de page en back-office pour comparer les performances sans écraser l'existant.
 
 ## Back-office (`/admin`)
 

@@ -31,6 +31,7 @@ const LANDING_ROUTES = {
   "/modele-nx": "nx.html",
   "/modele-chr": "chr.html",
   "/modele-chr-plus": "chr-plus.html",
+  "/modele-chr-video": "chr-video.html",
   "/modele-yaris-cross": "yaris-cross.html"
 };
 
@@ -255,11 +256,12 @@ const ZIPCODE_RE = /^\d{5}$/;
 
 function detectPage(lead) {
   const explicitPage = String(lead.page || "").toUpperCase();
-  if (explicitPage && ["LBX", "NX", "CHR", "CHR_PLUS", "YARIS"].includes(explicitPage)) {
+  if (explicitPage && ["LBX", "NX", "CHR", "CHR_PLUS", "CHR_VIDEO", "YARIS"].includes(explicitPage)) {
     return explicitPage;
   }
   const fromUrl = String(lead.page_url || "").toLowerCase();
   if (fromUrl.includes("modele-yaris-cross") || fromUrl.includes("yaris-cross.html")) return "YARIS";
+  if (fromUrl.includes("modele-chr-video") || fromUrl.includes("chr-video.html")) return "CHR_VIDEO";
   if (fromUrl.includes("modele-chr-plus") || fromUrl.includes("chr-plus.html")) return "CHR_PLUS";
   if (fromUrl.includes("modele-chr") || fromUrl.includes("chr.html")) return "CHR";
   if (fromUrl.includes("modele-nx") || fromUrl.includes("nx.html")) return "NX";
@@ -267,6 +269,7 @@ function detectPage(lead) {
   const model = String(lead.modele || "").toLowerCase();
   const offer = String(lead.offre || "").toLowerCase();
   if (model.includes("yaris cross") || model.includes("yaris-cross")) return "YARIS";
+  if (offer.includes("chr_video")) return "CHR_VIDEO";
   if (offer.includes("chr_plus")) return "CHR_PLUS";
   if (model.includes("c-hr+") || model.includes("c-hr") || model.includes("chr")) return "CHR";
   return model.includes("nx") ? "NX" : "LBX";
@@ -291,6 +294,12 @@ function getPageMeta(page) {
       model: "Toyota C-HR+",
       offer: "CHR_PLUS_PART_JUIN_2026",
       landing: "Toyota C-HR+ (Landing scroll)"
+    },
+    CHR_VIDEO: {
+      brand: "Toyota",
+      model: "Toyota C-HR+",
+      offer: "CHR_VIDEO_PART_JUIN_2026",
+      landing: "Toyota C-HR+ (Landing vidéo)"
     },
     NX: {
       brand: "Lexus",
@@ -977,7 +986,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Landings JPO + admin server running on http://127.0.0.1:${PORT}`);
-  console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX) · /modele-chr (C-HR+) · /modele-chr-plus (C-HR+ V2) · /modele-yaris-cross (YARIS)`);
+  console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX) · /modele-chr (C-HR+) · /modele-chr-plus (C-HR+ LP) · /modele-chr-video (C-HR+ Vidéo) · /modele-yaris-cross (YARIS)`);
   console.log(`  Admin    : /admin/login`);
 
   const dbw = db.getDatabowlSettings();
