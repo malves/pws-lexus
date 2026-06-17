@@ -322,7 +322,7 @@ function renderDashboard() {
     <div class="filters">
       <div class="f">
         <label>Page</label>
-        <select id="fPage"><option value="">Toutes</option><option value="LBX">LBX</option><option value="NX">NX</option><option value="CHR">C-HR+</option><option value="YARIS">YARIS</option></select>
+        <select id="fPage"><option value="">Toutes</option><option value="LBX">LBX</option><option value="NX">NX</option><option value="CHR">C-HR+</option><option value="CHR_V2">C-HR+ V2</option><option value="YARIS">YARIS</option></select>
       </div>
       <div class="f">
         <label>Statut</label>
@@ -510,6 +510,27 @@ function renderDashboard() {
         </div>
       </div>
       <div class="dbw-page">
+        <div class="dbw-page-title">Page C-HR+ V2 <span class="muted">· /modele-chr-plus</span></div>
+        <div class="row full">
+          <label for="dbwChrV2Campaign">Code campagne BACS</label>
+          <input id="dbwChrV2Campaign" type="text" placeholder="701Aa00001xxxx" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="grid">
+          <div class="row">
+            <label for="dbwChrV2Cid">cid</label>
+            <input id="dbwChrV2Cid" type="text" inputmode="numeric" placeholder="364" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="row">
+            <label for="dbwChrV2Sid">sid</label>
+            <input id="dbwChrV2Sid" type="text" inputmode="numeric" placeholder="1189" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <div class="toggle">
+          <input id="dbwChrV2Enabled" type="checkbox">
+          <label for="dbwChrV2Enabled">Activer l'envoi des leads C-HR+ V2</label>
+        </div>
+      </div>
+      <div class="dbw-page">
         <div class="dbw-page-title">Page YARIS <span class="muted">· /modele-yaris-cross</span></div>
         <div class="row full">
           <label for="dbwYarisCampaign">Code campagne BACS</label>
@@ -573,6 +594,10 @@ function renderDashboard() {
       dbwChrCid: document.getElementById("dbwChrCid"),
       dbwChrSid: document.getElementById("dbwChrSid"),
       dbwChrEnabled: document.getElementById("dbwChrEnabled"),
+      dbwChrV2Campaign: document.getElementById("dbwChrV2Campaign"),
+      dbwChrV2Cid: document.getElementById("dbwChrV2Cid"),
+      dbwChrV2Sid: document.getElementById("dbwChrV2Sid"),
+      dbwChrV2Enabled: document.getElementById("dbwChrV2Enabled"),
       dbwYarisCampaign: document.getElementById("dbwYarisCampaign"),
       dbwYarisCid: document.getElementById("dbwYarisCid"),
       dbwYarisSid: document.getElementById("dbwYarisSid"),
@@ -695,7 +720,7 @@ function renderDashboard() {
 
     function dbwActiveCount(s) {
       let n = 0;
-      ["LBX", "NX", "CHR", "YARIS"].forEach((p) => {
+      ["LBX", "NX", "CHR", "CHR_V2", "YARIS"].forEach((p) => {
         const c = s[p] || {};
         if (c.enabled && c.campaign) n++;
       });
@@ -704,7 +729,7 @@ function renderDashboard() {
 
     async function loadDbwSettings() {
       const s = await (await fetch("/api/admin/settings/databowl")).json();
-      const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, yaris = s.YARIS || {};
+      const lbx = s.LBX || {}, nx = s.NX || {}, chr = s.CHR || {}, chrV2 = s.CHR_V2 || {}, yaris = s.YARIS || {};
       els.dbwLbxCampaign.value = lbx.campaign || "";
       els.dbwLbxCid.value = lbx.cid || "";
       els.dbwLbxSid.value = lbx.sid || "";
@@ -717,12 +742,16 @@ function renderDashboard() {
       els.dbwChrCid.value = chr.cid || "";
       els.dbwChrSid.value = chr.sid || "";
       els.dbwChrEnabled.checked = !!chr.enabled;
+      els.dbwChrV2Campaign.value = chrV2.campaign || "";
+      els.dbwChrV2Cid.value = chrV2.cid || "";
+      els.dbwChrV2Sid.value = chrV2.sid || "";
+      els.dbwChrV2Enabled.checked = !!chrV2.enabled;
       els.dbwYarisCampaign.value = yaris.campaign || "";
       els.dbwYarisCid.value = yaris.cid || "";
       els.dbwYarisSid.value = yaris.sid || "";
       els.dbwYarisEnabled.checked = !!yaris.enabled;
       const active = dbwActiveCount(s);
-      els.dbwOpenBtn.textContent = active ? "Databowl · " + active + "/4 actif" : "Databowl";
+      els.dbwOpenBtn.textContent = active ? "Databowl · " + active + "/5 actif" : "Databowl";
     }
 
     function openDbwModal() {
@@ -763,6 +792,12 @@ function renderDashboard() {
           sid: els.dbwChrSid.value.trim(),
           enabled: els.dbwChrEnabled.checked
         },
+        CHR_V2: {
+          campaign: els.dbwChrV2Campaign.value.trim(),
+          cid: els.dbwChrV2Cid.value.trim(),
+          sid: els.dbwChrV2Sid.value.trim(),
+          enabled: els.dbwChrV2Enabled.checked
+        },
         YARIS: {
           campaign: els.dbwYarisCampaign.value.trim(),
           cid: els.dbwYarisCid.value.trim(),
@@ -781,7 +816,7 @@ function renderDashboard() {
         els.dbwMsg.className = "settings-msg ok";
         els.dbwOpenBtn.textContent = (function(){
           const a = dbwActiveCount(data);
-          return a ? "Databowl · " + a + "/4 actif" : "Databowl";
+          return a ? "Databowl · " + a + "/5 actif" : "Databowl";
         })();
         setTimeout(closeDbwModal, 800);
       } else {
@@ -798,7 +833,7 @@ function renderDashboard() {
         ["Taux de succès", s.success_rate + "<small>%</small>", ""],
         ["Échecs serveur", s.server_validation_failed, "bad"],
         ["Échecs navigateur", s.client_validation_failed, "bad"],
-        ["LBX / NX / C-HR+ / YARIS", (s.by_page.LBX || 0) + " <small>/</small> " + (s.by_page.NX || 0) + " <small>/</small> " + (s.by_page.CHR || 0) + " <small>/</small> " + (s.by_page.YARIS || 0), ""]
+        ["LBX / NX / C-HR+ / C-HR+ V2 / YARIS", (s.by_page.LBX || 0) + " <small>/</small> " + (s.by_page.NX || 0) + " <small>/</small> " + (s.by_page.CHR || 0) + " <small>/</small> " + (s.by_page.CHR_V2 || 0) + " <small>/</small> " + (s.by_page.YARIS || 0), ""]
       ].map(([k, v, cls]) =>
         '<div class="stat ' + cls + '"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'
       ).join("");

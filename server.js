@@ -27,6 +27,8 @@ const LANDING_ROUTES = {
   "/modele-lbx": "index.html",
   "/modele-nx": "nx.html",
   "/modele-chr": "chr.html",
+  "/modele-chr-plus": "chr-plus.html",
+  "/modele-chr-plus-v2": "chr-plus.html",
   "/modele-yaris-cross": "yaris-cross.html"
 };
 
@@ -205,8 +207,18 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ZIPCODE_RE = /^\d{5}$/;
 
 function detectPage(lead) {
+  const explicitPage = String(lead.page || "").toUpperCase();
+  if (explicitPage && ["LBX", "NX", "CHR", "CHR_V2", "YARIS"].includes(explicitPage)) {
+    return explicitPage;
+  }
   const fromUrl = String(lead.page_url || "").toLowerCase();
   if (fromUrl.includes("modele-yaris-cross") || fromUrl.includes("yaris-cross.html")) return "YARIS";
+  if (
+    fromUrl.includes("modele-chr-plus") ||
+    fromUrl.includes("modele-chr-plus-v2") ||
+    fromUrl.includes("chr-plus.html") ||
+    fromUrl.includes("chr-plus-v2.html")
+  ) return "CHR_V2";
   if (fromUrl.includes("modele-chr") || fromUrl.includes("chr.html")) return "CHR";
   if (fromUrl.includes("modele-nx") || fromUrl.includes("nx.html")) return "NX";
   if (fromUrl.includes("modele-lbx") || fromUrl.includes("index.html")) return "LBX";
@@ -229,6 +241,12 @@ function getPageMeta(page) {
       model: "Toyota C-HR+",
       offer: "CHR_PART_JUIN_2026",
       landing: "Toyota C-HR+"
+    },
+    CHR_V2: {
+      brand: "Toyota",
+      model: "Toyota C-HR+",
+      offer: "CHR_PART_JUIN_2026",
+      landing: "Toyota C-HR+ V2"
     },
     NX: {
       brand: "Lexus",
@@ -867,7 +885,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Landings JPO + admin server running on http://127.0.0.1:${PORT}`);
-  console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX) · /modele-chr (C-HR+) · /modele-yaris-cross (YARIS)`);
+  console.log(`  Landings : /modele-lbx (LBX) · /modele-nx (NX) · /modele-chr (C-HR+) · /modele-chr-plus (C-HR+ V2) · /modele-yaris-cross (YARIS)`);
   console.log(`  Admin    : /admin/login`);
 
   const dbw = db.getDatabowlSettings();
