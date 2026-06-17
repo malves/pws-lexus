@@ -27,6 +27,7 @@ const LANDING_ROUTES = {
   "/modele-lbx": "index.html",
   "/modele-nx": "nx.html",
   "/modele-chr": "chr.html",
+  "/modele-chr-plus": "chr-plus.html",
   "/modele-yaris-cross": "yaris-cross.html"
 };
 
@@ -207,11 +208,14 @@ const ZIPCODE_RE = /^\d{5}$/;
 function detectPage(lead) {
   const fromUrl = String(lead.page_url || "").toLowerCase();
   if (fromUrl.includes("modele-yaris-cross") || fromUrl.includes("yaris-cross.html")) return "YARIS";
+  if (fromUrl.includes("modele-chr-plus") || fromUrl.includes("chr-plus.html")) return "CHR_PLUS";
   if (fromUrl.includes("modele-chr") || fromUrl.includes("chr.html")) return "CHR";
   if (fromUrl.includes("modele-nx") || fromUrl.includes("nx.html")) return "NX";
   if (fromUrl.includes("modele-lbx") || fromUrl.includes("index.html")) return "LBX";
   const model = String(lead.modele || "").toLowerCase();
+  const offer = String(lead.offre || "").toLowerCase();
   if (model.includes("yaris cross") || model.includes("yaris-cross")) return "YARIS";
+  if (offer.includes("chr_plus")) return "CHR_PLUS";
   if (model.includes("c-hr+") || model.includes("c-hr") || model.includes("chr")) return "CHR";
   return model.includes("nx") ? "NX" : "LBX";
 }
@@ -229,6 +233,12 @@ function getPageMeta(page) {
       model: "Toyota C-HR+",
       offer: "CHR_PART_JUIN_2026",
       landing: "Toyota C-HR+"
+    },
+    CHR_PLUS: {
+      brand: "Toyota",
+      model: "Toyota C-HR+",
+      offer: "CHR_PLUS_PART_JUIN_2026",
+      landing: "Toyota C-HR+ (Landing scroll)"
     },
     NX: {
       brand: "Lexus",

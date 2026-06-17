@@ -97,11 +97,12 @@ function setAnalyticsSettings({ enabled, measurement_id }) {
 // identifiants techniques cid/sid). Tout est configurable EXCLUSIVEMENT depuis
 // l'admin ; les valeurs par defaut ci-dessous servent uniquement de seed initial.
 // --------------------------------------------------------------------------
-const DATABOWL_PAGES = ["LBX", "NX", "CHR", "YARIS"];
+const DATABOWL_PAGES = ["LBX", "NX", "CHR", "CHR_PLUS", "YARIS"];
 const DEFAULT_DATABOWL_SETTINGS = {
   LBX: { campaign: "701Sa00002elzpZ", cid: "628", sid: "1189" },
   NX: { campaign: "701Sa00002elGuO", cid: "628", sid: "1189" },
   CHR: { campaign: "701Sa00002enXXV", cid: "364", sid: "1189" },
+  CHR_PLUS: { campaign: "701Sa00002enXXV", cid: "364", sid: "1189" },
   YARIS: { campaign: "701Sa00002enXXV", cid: "364", sid: "1189" }
 };
 
