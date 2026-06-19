@@ -217,6 +217,33 @@
       outline-offset: 4px;
     }
 
+    .home-logout {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 250, 242, .18);
+      border-radius: 999px;
+      color: rgba(255, 250, 242, .62);
+      font-size: 12px;
+      letter-spacing: .04em;
+      background: rgba(9, 9, 9, .55);
+      backdrop-filter: blur(8px);
+      transition: color .25s ease, border-color .25s ease, background .25s ease;
+    }
+
+    .home-logout:hover {
+      color: var(--white);
+      border-color: rgba(255, 250, 242, .35);
+      background: rgba(9, 9, 9, .72);
+    }
+
+    .home-logout:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
     .home-foot {
       padding: 0 20px clamp(22px, 4vh, 40px);
       color: rgba(255, 250, 242, .5);
@@ -251,6 +278,7 @@
   </style>
 </head>
 <body>
+  <a class="home-logout" href="/home/logout">Déconnexion</a>
   <main class="home">
     <header class="home-top">
       <img class="home-logo" src="assets/lexus-logo.svg" alt="Lexus">

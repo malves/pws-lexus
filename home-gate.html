@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accès</title>
+  <style>
+    :root {
+      --bg: #0f1114;
+      --card: rgba(24, 27, 32, .92);
+      --line: rgba(255, 255, 255, .1);
+      --text: #eef1f5;
+      --muted: rgba(238, 241, 245, .62);
+      --accent: #8b93a7;
+      --error: #d46a6a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(120% 80% at 50% -20%, rgba(139, 147, 167, .14), transparent 55%),
+        var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input { font: inherit; }
+
+    .gate {
+      display: grid;
+      place-items: center;
+      min-height: 100dvh;
+      padding: 24px;
+    }
+
+    .gate-card {
+      width: min(360px, 100%);
+      padding: 32px 28px 28px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow:
+        0 24px 60px rgba(0, 0, 0, .35),
+        inset 0 1px 0 rgba(255, 255, 255, .04);
+      backdrop-filter: blur(12px);
+    }
+
+    .gate-icon {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--accent);
+      background: rgba(255, 255, 255, .03);
+    }
+
+    .gate-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .gate-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+      letter-spacing: .01em;
+    }
+
+    .gate-sub {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .gate-form {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .gate-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .gate-field label {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .gate-field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--text);
+      background: rgba(255, 255, 255, .04);
+      outline: none;
+      transition: border-color .2s ease, background .2s ease;
+    }
+
+    .gate-field input:focus {
+      border-color: rgba(139, 147, 167, .55);
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .gate-error {
+      min-height: 18px;
+      margin: 0;
+      color: var(--error);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .gate-submit {
+      margin-top: 4px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 10px;
+      color: var(--text);
+      font-weight: 500;
+      background: rgba(255, 255, 255, .06);
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease, opacity .2s ease;
+    }
+
+    .gate-submit:hover:not(:disabled) {
+      background: rgba(255, 255, 255, .1);
+      border-color: rgba(255, 255, 255, .22);
+    }
+
+    .gate-submit:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+  </style>
+</head>
+<body>
+  <main class="gate">
+    <section class="gate-card" aria-labelledby="gate-title">
+      <div class="gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="5" y="11" width="14" height="10" rx="2"/>
+          <path d="M8 11V8a4 4 0 1 1 8 0v3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 id="gate-title" class="gate-title">Accès restreint</h1>
+      <p class="gate-sub">Saisissez le mot de passe pour continuer.</p>
+
+      <form class="gate-form" id="gate-form" novalidate>
+        <div class="gate-field">
+          <label for="gate-password">Mot de passe</label>
+          <input id="gate-password" name="password" type="password" autocomplete="current-password" required autofocus>
+        </div>
+        <p class="gate-error" id="gate-error" role="alert" aria-live="polite"></p>
+        <button class="gate-submit" type="submit" id="gate-submit">Continuer</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("gate-form");
+    const passwordInput = document.getElementById("gate-password");
+    const errorEl = document.getElementById("gate-error");
+    const submitBtn = document.getElementById("gate-submit");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorEl.textContent = "";
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch("/api/home/unlock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: passwordInput.value })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok && data.ok) {
+          window.location.reload();
+          return;
+        }
+
+        errorEl.textContent = data.message || "Mot de passe incorrect.";
+        passwordInput.select();
+      } catch {
+        errorEl.textContent = "Connexion impossible. Reessayez.";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

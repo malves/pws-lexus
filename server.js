@@ -17,9 +17,12 @@ const POWERSPACE_ENDPOINT = "https://a.pwspace.com/ld";
 // configures par page exclusivement depuis l'admin (cf. db.getDatabowlPageSettings).
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
+const HOME_PASSWORD = process.env.HOME_PASSWORD || "";
 const SESSION_SECRET = process.env.SESSION_SECRET || "dev-secret-change-me";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 heures
+const HOME_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 jours
 const COOKIE_NAME = "lexus_admin";
+const HOME_COOKIE_NAME = "lexus_home";
 const CLICK_ID_COOKIE = "lexus_click_id";
 const CLICK_ID_MAX_AGE_SEC = 60 * 60 * 24 * 30; // 30 jours
 
@@ -163,6 +166,51 @@ function setSessionCookie(res, token) {
 
 function clearSessionCookie(res) {
   res.setHeader("Set-Cookie", `${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0`);
+}
+
+function createHomeSessionToken() {
+  const payload = JSON.stringify({ h: 1, exp: Date.now() + HOME_SESSION_TTL_MS });
+  const b64 = Buffer.from(payload).toString("base64url");
+  return `${b64}.${sign(b64)}`;
+}
+
+function verifyHomeSessionToken(token) {
+  if (!token || !token.includes(".")) return null;
+  const [b64, sig] = token.split(".");
+  const expected = sign(b64);
+  if (
+    sig.length !== expected.length ||
+    !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+  ) {
+    return null;
+  }
+  try {
+    const payload = JSON.parse(Buffer.from(b64, "base64url").toString("utf-8"));
+    if (!payload.h || !payload.exp || payload.exp < Date.now()) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function isHomeAuthed(req) {
+  if (!HOME_PASSWORD) return true;
+  const cookies = parseCookies(req);
+  return verifyHomeSessionToken(cookies[HOME_COOKIE_NAME]) !== null;
+}
+
+function setHomeSessionCookie(res, token) {
+  res.setHeader(
+    "Set-Cookie",
+    `${HOME_COOKIE_NAME}=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=${HOME_SESSION_TTL_MS / 1000}`
+  );
+}
+
+function clearHomeSessionCookie(res) {
+  res.setHeader(
+    "Set-Cookie",
+    `${HOME_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0`
+  );
 }
 
 function normalizeClickIdParam(key) {
@@ -542,6 +590,27 @@ async function handleLogin(req, res) {
   return sendJson(res, 200, { ok: true });
 }
 
+async function handleHomeUnlock(req, res) {
+  if (!HOME_PASSWORD) {
+    return sendJson(res, 503, { ok: false, message: "Acces home non configure." });
+  }
+
+  let body;
+
+  try {
+    body = await readJson(req);
+  } catch {
+    return sendJson(res, 400, { ok: false, message: "Requete invalide." });
+  }
+
+  if (!safeEqual(body.password || "", HOME_PASSWORD)) {
+    return sendJson(res, 401, { ok: false, message: "Mot de passe incorrect." });
+  }
+
+  setHomeSessionCookie(res, createHomeSessionToken());
+  return sendJson(res, 200, { ok: true });
+}
+
 function handleAdminApi(req, res, url) {
   if (!isAuthed(req)) return sendJson(res, 401, { error: "non authentifie" });
 
@@ -807,6 +876,11 @@ function serveStatic(req, res) {
 
   if (urlPath === "/") {
     syncClickIdCookieFromUrl(req, res, url);
+
+    if (!isHomeAuthed(req)) {
+      return sendHtmlFile(res, path.join(ROOT, "home-gate.html"));
+    }
+
     return sendHtmlFile(res, path.join(ROOT, "home.html"));
   }
 
@@ -867,6 +941,13 @@ const server = http.createServer((req, res) => {
 
   // Auth
   if (req.method === "POST" && pathname === "/admin/login") return runAsync(handleLogin)(req, res);
+  if (req.method === "POST" && pathname === "/api/home/unlock") return runAsync(handleHomeUnlock)(req, res);
+
+  if (pathname === "/home/logout") {
+    clearHomeSessionCookie(res);
+    res.writeHead(302, { Location: "/" });
+    return res.end();
+  }
 
   if (pathname === "/admin/logout") {
     clearSessionCookie(res);
