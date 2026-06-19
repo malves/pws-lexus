@@ -92,10 +92,10 @@
 
     .models {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: clamp(16px, 2.4vw, 30px);
       align-content: center;
-      width: min(980px, 100%);
+      width: min(1200px, 100%);
       margin: 0 auto;
       padding: clamp(24px, 4vh, 48px) clamp(18px, 4vw, 48px);
     }
@@ -254,7 +254,7 @@
 
     @media (max-width: 960px) {
       .models {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -318,12 +318,12 @@
         </div>
       </a>
 
-      <a class="model" href="/modele-chr" aria-label="Découvrir le Toyota C-HR+">
+      <a class="model" href="/modele-chr" aria-label="Découvrir le Toyota C-HR+ — page d'origine">
         <img src="assets/chr-toyota.jpg" alt="Toyota C-HR+">
         <div class="model-body">
-          <span class="model-kicker">100 % électrique · 0 g CO₂/km</span>
+          <span class="model-kicker">Page d'origine · 100 % électrique</span>
           <p class="model-name">Toyota C-HR+</p>
-          <p class="model-desc">Le SUV compact 100 % électrique, dès 329 €/mois en LLD, entretien inclus.</p>
+          <p class="model-desc">Landing d'origine, dès 329 €/mois en LLD 37 mois, entretien inclus.</p>
           <span class="model-cta">
             Découvrir l'offre
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
